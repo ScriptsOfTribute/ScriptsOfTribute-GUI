@@ -240,6 +240,24 @@ public class GameManager : MonoBehaviour
             EffectChoiceUI.SetActive(false);
         }
         state = BoardState.NORMAL;
+        if (patronObject.GetComponent<PatronScript>().patronID != PatronId.TREASURY)
+        {
+            var arrow = patronObject.transform.parent.transform.GetChild(0);
+            var favor = Board.GetLevelOfFavoritism(patronObject.GetComponent<PatronScript>().patronID);
+            switch (favor)
+            {
+                case PlayerEnum.PLAYER1:
+                    arrow.transform.rotation = Quaternion.Euler(0f, 0f, 270f);
+                    break;
+                case PlayerEnum.NO_PLAYER_SELECTED:
+                    arrow.transform.rotation = Quaternion.Euler(0f, 0f, 180f);
+                    break;
+                case PlayerEnum.PLAYER2:
+                    arrow.transform.rotation = Quaternion.Euler(0f, 0f, 90f);
+                    break;
+            }
+
+        }
         CleanupTavern();
         SetUpTavern();
 
