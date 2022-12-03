@@ -10,6 +10,8 @@ GameObject:
   m_Component:
   - component: {fileID: 4420988991177194314}
   - component: {fileID: 5708328685121614025}
+  - component: {fileID: 6304701777230207491}
+  - component: {fileID: 5914477593467356091}
   m_Layer: 0
   m_Name: Orgnum
   m_TagString: Untagged
@@ -84,6 +86,35 @@ SpriteRenderer:
   m_WasSpriteAssigned: 1
   m_MaskInteraction: 0
   m_SpriteSortPoint: 0
+--- !u!114 &6304701777230207491
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3071532966977030630}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b7708eff1c96f5b43be9a15be5d45f47, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  patronID: 4
+--- !u!58 &5914477593467356091
+CircleCollider2D:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3071532966977030630}
+  m_Enabled: 1
+  m_Density: 1
+  m_Material: {fileID: 0}
+  m_IsTrigger: 0
+  m_UsedByEffector: 0
+  m_UsedByComposite: 0
+  m_Offset: {x: 0, y: 0}
+  serializedVersion: 2
+  m_Radius: 0.73
 --- !u!1 &7165441858780056234
 GameObject:
   m_ObjectHideFlags: 0
@@ -93,8 +124,6 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 6580132084722035520}
-  - component: {fileID: -6828559906631887441}
-  - component: {fileID: 1393336249872814352}
   m_Layer: 0
   m_Name: Orgnum
   m_TagString: Patron
@@ -119,35 +148,6 @@ Transform:
   m_Father: {fileID: 0}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &-6828559906631887441
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 7165441858780056234}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: b7708eff1c96f5b43be9a15be5d45f47, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  patronID: 4
---- !u!58 &1393336249872814352
-CircleCollider2D:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 7165441858780056234}
-  m_Enabled: 1
-  m_Density: 1
-  m_Material: {fileID: 0}
-  m_IsTrigger: 0
-  m_UsedByEffector: 0
-  m_UsedByComposite: 0
-  m_Offset: {x: 0, y: 0}
-  serializedVersion: 2
-  m_Radius: 0.5
 --- !u!1 &8687179846020471850
 GameObject:
   m_ObjectHideFlags: 0

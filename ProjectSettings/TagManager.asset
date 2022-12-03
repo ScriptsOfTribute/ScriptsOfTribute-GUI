@@ -6,6 +6,7 @@ TagManager:
   tags:
   - Card
   - TavernCard
+  - Patron
   layers:
   - Default
   - TransparentFX

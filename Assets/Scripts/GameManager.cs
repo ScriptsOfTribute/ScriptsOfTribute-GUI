@@ -18,16 +18,14 @@ public class GameManager : MonoBehaviour
     public GameObject Player1Score;
     public GameObject Player2Score;
 
+    public GameObject CardChoiceUI;
+    public GameObject EffectChoiceUI;
+
+    private BoardState state = BoardState.NORMAL;
+
     void Start()
     {
-        PatronId[] patrons = new PatronId[5]
-        {
-            PatronId.ANSEI,
-            PatronId.DUKE_OF_CROWS,
-            PatronId.TREASURY,
-            PatronId.ORGNUM,
-            PatronId.RAJHIN
-        };
+        PatronId[] patrons = PatronSelectionScript.selectedPatrons.ToArray();
         Board = new TalesOfTributeApi(patrons);
 
         for (int i = 0; i < Patrons.transform.childCount; i++)
@@ -43,7 +41,7 @@ public class GameManager : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        if (Input.GetMouseButtonDown(0))
+        if (Input.GetMouseButtonDown(0) && state == BoardState.NORMAL)
         {
             Vector3 mousePos = Camera.main.ScreenToWorldPoint(Input.mousePosition);
             Vector2 mousePos2D = new Vector2(mousePos.x, mousePos.y);
@@ -53,16 +51,17 @@ public class GameManager : MonoBehaviour
             if (hit.collider != null)
             {
                 var tag = hit.collider.gameObject.tag;
+                Debug.Log(hit.collider.gameObject);
                 switch (tag)
                 {
                     case "Card":
-                        PlayCard(hit.collider.gameObject);
+                        StartCoroutine(PlayCard(hit.collider.gameObject));
                         break;
                     case "Patron":
-                        PatronActivation(hit.collider.gameObject.GetComponentInParent<PatronScript>().patronID);
+                        StartCoroutine(PatronActivation(hit.collider.gameObject));
                         break;
                     case "TavernCard":
-                        BuyCard(hit.collider.gameObject);
+                        StartCoroutine(BuyCard(hit.collider.gameObject));
                         break;
                 }
             }
@@ -103,6 +102,21 @@ public class GameManager : MonoBehaviour
         StartTurn();
     }
 
+    void RefreshAgents()
+    {
+        BoardSerializer serialize = Board.GetSerializer();
+        List<Card> currentPlayerAgents = Board.GetListOfAgents(serialize.CurrentPlayer);
+        Transform currentPlayerAgentsSlots = serialize.CurrentPlayer == PlayerEnum.PLAYER1
+                                    ? Player1.transform.GetChild(1) //0th idx is Hand, 1st is Agents
+                                    : Player2.transform.GetChild(1);
+
+        for (int i = 0; i < currentPlayerAgents.Count; i++)
+        {
+            GameObject card = Instantiate(CardPrefab, currentPlayerAgentsSlots.GetChild(i));
+            card.GetComponent<CardScript>().SetUpCardInfo(currentPlayerAgents[i]);
+        }
+    }
+
     public void RefreshScores()
     {
         PlayerSerializer serialize = Board.GetPlayersScores();
@@ -140,63 +154,136 @@ public class GameManager : MonoBehaviour
         }
     }
 
-    void PlayCard(GameObject card)
+    void RefreshHand()
     {
-        try
-        {
-            var chain = Board.PlayCard(card.GetComponent<CardScript>().GetCard());
-            foreach (PlayResult result in chain.Consume())
-            {
+        BoardSerializer serialize = Board.GetSerializer();
+        Transform currentPlayerHandSlots = serialize.CurrentPlayer == PlayerEnum.PLAYER1
+                                    ? Player1.transform.GetChild(0) //0th idx is Hand, 1st is Agents
+                                    : Player2.transform.GetChild(0);
 
-            }
-            Destroy(card);
-            RefreshScores();
-        }
-        catch (System.Exception e)
+        for (int i = 0; i < currentPlayerHandSlots.childCount; i++)
         {
-            Debug.Log(e.Message);
-            return;
+            if (currentPlayerHandSlots.GetChild(i).childCount > 0)
+                Destroy(currentPlayerHandSlots.GetChild(i).GetChild(0).gameObject);
+        }
+        List<Card> currentPlayerHand = Board.GetHand();
+        for (int i = 0; i < currentPlayerHand.Count; i++)
+        {
+            GameObject card = Instantiate(CardPrefab, currentPlayerHandSlots.GetChild(i));
+            card.GetComponent<CardScript>().SetUpCardInfo(currentPlayerHand[i]);
         }
     }
 
-    void BuyCard(GameObject card)
+    IEnumerator PlayCard(GameObject card)
     {
-        try
-        {
-            var chain = Board.BuyCard(card.GetComponent<CardScript>().GetCard());
-            foreach (PlayResult result in chain.Consume())
-            {
+        Debug.Log(card.GetComponent<CardScript>().GetCard());
+        var chain = Board.PlayCard(card.GetComponent<CardScript>().GetCard());
+        yield return StartCoroutine(ConsumeChain(chain));
+        Destroy(card);
 
-            }
-            Destroy(card);
+        CleanupTavern();
+        SetUpTavern();
 
-            CleanupTavern();
-            SetUpTavern();
+        //RefreshAgents();
+        RefreshScores();
+        RefreshHand();
 
-            RefreshScores();
-        }
-        catch (System.Exception e)
-        {
-            Debug.Log(e.Message);
-            return;
-        }
+
+        yield return null;
     }
 
-    void PatronActivation(PatronId patron)
+    IEnumerator BuyCard(GameObject card)
     {
-        try
+        Debug.Log(card.GetComponent<CardScript>().GetCard());
+        var chain = Board.BuyCard(card.GetComponent<CardScript>().GetCard());
+        yield return StartCoroutine(ConsumeChain(chain));
+        Destroy(card);
+
+        CleanupTavern();
+        SetUpTavern();
+
+        //RefreshAgents();
+        RefreshScores();
+        RefreshHand();
+
+        yield return null;
+    }
+
+    IEnumerator PatronActivation(GameObject patronObject)
+    {
+        var result = Board.PatronActivation(patronObject.GetComponent<PatronScript>().patronID);
+        if (result is Success)
         {
-            var result = Board.PatronActivation(patron);
-            if (!result.Completed)
+            // All fine
+        }
+        else if (result is Failure failure)
+        {
+            Debug.Log(failure.Reason);
+        }
+        else if (result is Choice<Card> choice)
+        {
+            state = BoardState.CHOICE_PENDING;
+            Debug.Log("choice start");
+            CardChoiceUI.SetActive(true);
+            CardChoiceUI.GetComponent<CardChoiceUIScript>().SetUpChoices(choice);
+            yield return new WaitUntil(() => CardChoiceUI.GetComponent<CardChoiceUIScript>().GetCompletedStatus());
+            Debug.Log("choice finished");
+            CardChoiceUI.SetActive(false);
+        }
+        else if (result is Choice<EffectType> effectChoice)
+        {
+            state = BoardState.CHOICE_PENDING;
+            Debug.Log("choice start");
+            EffectChoiceUI.SetActive(true);
+            EffectChoiceUI.GetComponent<EffectUIScript>().SetUpChoices(effectChoice);
+            yield return new WaitUntil(() => EffectChoiceUI.GetComponent<EffectUIScript>().GetCompletedStatus());
+            EffectChoiceUI.SetActive(false);
+        }
+        state = BoardState.NORMAL;
+        CleanupTavern();
+        SetUpTavern();
+
+        //RefreshAgents();
+        RefreshScores();
+        RefreshHand();
+
+        yield return null;
+    }
+
+    IEnumerator ConsumeChain(ExecutionChain chain)
+    {
+        foreach (var result in chain.Consume())
+        {
+            if (result is Success)
             {
-                Debug.Log("kaput");
+                continue; // All fine
             }
-            RefreshScores();
+            else if (result is Failure failure)
+            {
+                Debug.Log(failure.Reason);
+            }
+            else if (result is Choice<Card> choice)
+            {
+                state = BoardState.CHOICE_PENDING;
+                Debug.Log("choice start");
+                CardChoiceUI.SetActive(true);
+                CardChoiceUI.GetComponent<CardChoiceUIScript>().SetUpChoices(choice);
+                yield return new WaitUntil(() => CardChoiceUI.GetComponent<CardChoiceUIScript>().GetCompletedStatus());
+                Debug.Log("choice finished");
+                CardChoiceUI.SetActive(false);
+            }
+            else if (result is Choice<EffectType> effectChoice)
+            {
+                state = BoardState.CHOICE_PENDING;
+                Debug.Log("choice start");
+                EffectChoiceUI.SetActive(true);
+                EffectChoiceUI.GetComponent<EffectUIScript>().SetUpChoices(effectChoice);
+                yield return new WaitUntil(() => EffectChoiceUI.GetComponent<EffectUIScript>().GetCompletedStatus());
+                EffectChoiceUI.SetActive(false);
+            }
+
         }
-        catch (System.Exception e)
-        {
-            Debug.Log(e.Message);
-            return;
-        }
+        state = BoardState.NORMAL;
+        yield return null;
     }
 }

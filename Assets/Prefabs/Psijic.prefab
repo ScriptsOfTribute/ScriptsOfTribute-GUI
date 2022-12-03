@@ -11,6 +11,7 @@ GameObject:
   - component: {fileID: 7705616030607076986}
   - component: {fileID: 7443141072626747241}
   - component: {fileID: 1277250838227270087}
+  - component: {fileID: 213908517109124643}
   m_Layer: 0
   m_Name: Psijic
   m_TagString: Patron
@@ -101,6 +102,19 @@ CircleCollider2D:
   m_Offset: {x: 0, y: 0}
   serializedVersion: 2
   m_Radius: 0.73
+--- !u!114 &213908517109124643
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7130398340748867734}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b7708eff1c96f5b43be9a15be5d45f47, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  patronID: 3
 --- !u!1 &7165441858780056234
 GameObject:
   m_ObjectHideFlags: 0
@@ -110,7 +124,6 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 6580132084722035520}
-  - component: {fileID: 6761603925843525511}
   m_Layer: 0
   m_Name: Psijic
   m_TagString: Untagged
@@ -135,19 +148,6 @@ Transform:
   m_Father: {fileID: 0}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &6761603925843525511
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 7165441858780056234}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: b7708eff1c96f5b43be9a15be5d45f47, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  patronID: 3
 --- !u!1 &8687179846020471850
 GameObject:
   m_ObjectHideFlags: 0
