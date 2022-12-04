@@ -5452,7 +5452,7 @@ MonoBehaviour:
   Player1: {fileID: 629981492}
   Player2: {fileID: 1472878366}
   Patrons: {fileID: 1265200615}
-  CardPrefab: {fileID: 2478146443381007154, guid: 22ae7bb15a2e94a49874d1c5cdf61476, type: 3}
+  CardPrefab: {fileID: 4871502333884723903, guid: b9cc6ec055ba52e43958d093ac1d953c, type: 3}
   PatronsPrefabs:
   - {fileID: 7165441858780056234, guid: 54432bb2e78e0a345b982a4567003c44, type: 3}
   - {fileID: 7165441858780056234, guid: 6bc95eef62a16f8429e31874f2e235c1, type: 3}
@@ -7029,7 +7029,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!114 &1852766179
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -8284,7 +8284,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!114 &2034177534
 MonoBehaviour:
   m_ObjectHideFlags: 0

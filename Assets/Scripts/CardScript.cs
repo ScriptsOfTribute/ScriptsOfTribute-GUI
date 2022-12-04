@@ -7,25 +7,36 @@ using TMPro;
 public class CardScript : MonoBehaviour
 {
     private Card _card;
-    public TextMeshPro description;
-    public TextMeshPro effects;
+    public TextMeshPro Cost;
+    public TextMeshPro Name;
+    public TextMeshPro Type;
+    public TextMeshPro Deck;
+    public TextMeshPro Effects;
 
     public void SetUpCardInfo(Card card)
     {
         _card = card;
 
-        string desc = $"{card.Name}\nCost: {card.Cost}, Type: {card.Type}\nDeck:{card.Deck}";
+        Cost.SetText(card.Cost.ToString());
+        Name.SetText(card.Name);
+        Type.SetText(card.Type.ToString());
+        Deck.SetText(card.Deck.ToString());
 
-        description.SetText(desc);
+        string effects = "";
 
-        string eff = "";
         for(int i = 0; i < card.Effects.Length; i++)
         {
-            if (card.Effects[i] != null)
-                eff += $"{i}. {card.Effects[i].ToString()}\n";
+            if (i == 0 && card.Effects[0] != null) //Activation
+            {
+                effects += $"{card.Effects[i]}\n";
+            }
+            else if (card.Effects[i] != null)
+            {
+                effects += $"Combo {i + 1}: {card.Effects[i]}\n";
+            }
         }
 
-        effects.SetText(eff);
+        Effects.SetText(effects);
     }
 
     public Card GetCard()
