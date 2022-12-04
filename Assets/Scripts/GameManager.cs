@@ -6,7 +6,7 @@ using TMPro;
 using System;
 public class GameManager : MonoBehaviour
 {
-    private static TalesOfTributeApi Board;
+    public static TalesOfTributeApi Board;
     public GameObject Tavern;
     public GameObject Player1;
     public GameObject Player2;
@@ -22,6 +22,7 @@ public class GameManager : MonoBehaviour
     public GameObject EffectChoiceUI;
 
     private BoardState state = BoardState.NORMAL;
+    public static bool isUIActive = false;
 
     void Start()
     {
@@ -41,7 +42,7 @@ public class GameManager : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        if (Input.GetMouseButtonDown(0) && state == BoardState.NORMAL)
+        if (Input.GetMouseButtonDown(0) && state == BoardState.NORMAL && !isUIActive)
         {
             Vector3 mousePos = Camera.main.ScreenToWorldPoint(Input.mousePosition);
             Vector2 mousePos2D = new Vector2(mousePos.x, mousePos.y);
@@ -51,7 +52,6 @@ public class GameManager : MonoBehaviour
             if (hit.collider != null)
             {
                 var tag = hit.collider.gameObject.tag;
-                Debug.Log(hit.collider.gameObject);
                 switch (tag)
                 {
                     case "Card":
@@ -105,7 +105,7 @@ public class GameManager : MonoBehaviour
     void RefreshAgents()
     {
         BoardSerializer serialize = Board.GetSerializer();
-        List<Card> currentPlayerAgents = Board.GetListOfAgents(serialize.CurrentPlayer);
+        List<Card> currentPlayerAgents = Board.GetAgents();
         Transform currentPlayerAgentsSlots = serialize.CurrentPlayer == PlayerEnum.PLAYER1
                                     ? Player1.transform.GetChild(1) //0th idx is Hand, 1st is Agents
                                     : Player2.transform.GetChild(1);
@@ -282,6 +282,8 @@ public class GameManager : MonoBehaviour
             }
             else if (result is Choice<Card> choice)
             {
+                if (choice.PossibleChoices.Count == 0)
+                    continue;
                 state = BoardState.CHOICE_PENDING;
                 Debug.Log("choice start");
                 CardChoiceUI.SetActive(true);
@@ -292,6 +294,8 @@ public class GameManager : MonoBehaviour
             }
             else if (result is Choice<EffectType> effectChoice)
             {
+                if (effectChoice.PossibleChoices.Count == 0)
+                    continue;
                 state = BoardState.CHOICE_PENDING;
                 Debug.Log("choice start");
                 EffectChoiceUI.SetActive(true);
