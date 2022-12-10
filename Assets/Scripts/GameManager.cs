@@ -1,9 +1,10 @@
 using System.Collections;
 using System.Collections.Generic;
-using UnityEngine;
 using TalesOfTribute;
+using TalesOfTribute.Board;
+using TalesOfTribute.Serializers;
 using TMPro;
-using System;
+using UnityEngine;
 public class GameManager : MonoBehaviour
 {
     public static TalesOfTributeApi Board;
@@ -13,6 +14,7 @@ public class GameManager : MonoBehaviour
     public GameObject Patrons;
 
     public GameObject CardPrefab;
+    public GameObject AgentPrefab;
     public GameObject[] PatronsPrefabs;
 
     public GameObject Player1Score;
@@ -63,17 +65,21 @@ public class GameManager : MonoBehaviour
                     case "TavernCard":
                         StartCoroutine(BuyCard(hit.collider.gameObject));
                         break;
+                    case "Agent":
+                        StartCoroutine(HandleAgent(hit.collider.gameObject));
+                        break;
                 }
+                RefreshScores();
+                RefreshAgents();
             }
         }
     }
 
     public void StartTurn()
     {
-        Board.DrawCards();
-        BoardSerializer serialize = Board.GetSerializer();
+        SerializedBoard serialize = Board.GetSerializer();
         List<Card> currentPlayerHand = Board.GetHand();
-        Transform currentPlayerHandSlots = serialize.CurrentPlayer == PlayerEnum.PLAYER1
+        Transform currentPlayerHandSlots = serialize.CurrentPlayer.PlayerID == PlayerEnum.PLAYER1
                                     ? Player1.transform.GetChild(0) //0th idx is Hand, 1st is Agents
                                     : Player2.transform.GetChild(0);
 
@@ -87,8 +93,8 @@ public class GameManager : MonoBehaviour
 
     public void EndTurn()
     {
-        BoardSerializer serialize = Board.GetSerializer();
-        Transform currentPlayerHandSlots = serialize.CurrentPlayer == PlayerEnum.PLAYER1
+        SerializedBoard serialize = Board.GetSerializer();
+        Transform currentPlayerHandSlots = serialize.CurrentPlayer.PlayerID == PlayerEnum.PLAYER1
                                     ? Player1.transform.GetChild(0) //0th idx is Hand, 1st is Agents
                                     : Player2.transform.GetChild(0);
 
@@ -99,37 +105,68 @@ public class GameManager : MonoBehaviour
         }
         Board.EndTurn();
         RefreshScores();
+        RefreshAgents();
         StartTurn();
     }
 
     void RefreshAgents()
     {
-        BoardSerializer serialize = Board.GetSerializer();
-        List<Card> currentPlayerAgents = Board.GetAgents();
-        Transform currentPlayerAgentsSlots = serialize.CurrentPlayer == PlayerEnum.PLAYER1
+        SerializedBoard serialize = Board.GetSerializer();
+        List<SerializedAgent> currentPlayerAgents = serialize.CurrentPlayer.Agents;
+        List<SerializedAgent> enemyPlayerAgents = serialize.EnemyPlayer.Agents;
+        Transform currentPlayerAgentsSlots = serialize.CurrentPlayer.PlayerID == PlayerEnum.PLAYER1
                                     ? Player1.transform.GetChild(1) //0th idx is Hand, 1st is Agents
                                     : Player2.transform.GetChild(1);
+        Transform enemyAgentsSlots = serialize.CurrentPlayer.PlayerID == PlayerEnum.PLAYER1
+                                    ? Player2.transform.GetChild(1) //0th idx is Hand, 1st is Agents
+                                    : Player1.transform.GetChild(1);
+
+        for (int i = 0; i < currentPlayerAgentsSlots.childCount; i++)
+        {
+            if (currentPlayerAgentsSlots.GetChild(i).childCount > 0)
+            {
+                Destroy(currentPlayerAgentsSlots.GetChild(i).GetChild(0).gameObject);
+            }                
+        }
+
+        for (int i = 0; i < enemyAgentsSlots.childCount; i++)
+        {
+            if (enemyAgentsSlots.GetChild(i).childCount > 0)
+            {
+                Destroy(enemyAgentsSlots.GetChild(i).GetChild(0).gameObject);
+            }
+        }
 
         for (int i = 0; i < currentPlayerAgents.Count; i++)
         {
-            GameObject card = Instantiate(CardPrefab, currentPlayerAgentsSlots.GetChild(i));
-            card.GetComponent<CardScript>().SetUpCardInfo(currentPlayerAgents[i]);
+            Debug.Log(currentPlayerAgents[i].RepresentingCard.ToString());
+            GameObject card = Instantiate(AgentPrefab, currentPlayerAgentsSlots.GetChild(i));
+            card.GetComponent<AgentScript>().SetUpCardInfo(currentPlayerAgents[i]);
+        }
+
+        for (int i = 0; i < enemyPlayerAgents.Count; i++)
+        {
+            Debug.Log(enemyPlayerAgents[i].RepresentingCard.ToString());
+            GameObject card = Instantiate(AgentPrefab, enemyAgentsSlots.GetChild(i));
+            card.GetComponent<AgentScript>().SetUpCardInfo(enemyPlayerAgents[i]);
         }
     }
 
     public void RefreshScores()
     {
-        PlayerSerializer serialize = Board.GetPlayersScores();
+        SerializedPlayer player = Board.GetPlayer(PlayerEnum.PLAYER1);
 
-        string text = $"Gold: {serialize.FirstPlayer.X}\n" +
-                    $"Prestige: {serialize.FirstPlayer.Y}\n" +
-                    $"Power: {serialize.FirstPlayer.Z}\n";
+        string text = $"Gold: {player.Coins}\n" +
+                    $"Prestige: {player.Prestige}\n" +
+                    $"Power: {player.Power}\n";
 
         Player1Score.GetComponent<TextMeshProUGUI>().SetText(text);
 
-        text = $"Gold: {serialize.SecondPlayer.X}\n" +
-                    $"Prestige: {serialize.SecondPlayer.Y}\n" +
-                    $"Power: {serialize.SecondPlayer.Z}\n";
+        player = Board.GetPlayer(PlayerEnum.PLAYER2);
+
+        text = $"Gold: {player.Coins}\n" +
+                $"Prestige: {player.Prestige}\n" +
+                $"Power: {player.Power}\n";
 
         Player2Score.GetComponent<TextMeshProUGUI>().SetText(text);
     }
@@ -156,8 +193,8 @@ public class GameManager : MonoBehaviour
 
     void RefreshHand()
     {
-        BoardSerializer serialize = Board.GetSerializer();
-        Transform currentPlayerHandSlots = serialize.CurrentPlayer == PlayerEnum.PLAYER1
+        SerializedBoard serialize = Board.GetSerializer();
+        Transform currentPlayerHandSlots = serialize.CurrentPlayer.PlayerID == PlayerEnum.PLAYER1
                                     ? Player1.transform.GetChild(0) //0th idx is Hand, 1st is Agents
                                     : Player2.transform.GetChild(0);
 
@@ -184,9 +221,9 @@ public class GameManager : MonoBehaviour
         CleanupTavern();
         SetUpTavern();
 
-        //RefreshAgents();
         RefreshScores();
         RefreshHand();
+        RefreshAgents();
 
 
         yield return null;
@@ -202,15 +239,16 @@ public class GameManager : MonoBehaviour
         CleanupTavern();
         SetUpTavern();
 
-        //RefreshAgents();
         RefreshScores();
         RefreshHand();
+        RefreshAgents();
 
         yield return null;
     }
 
     IEnumerator PatronActivation(GameObject patronObject)
     {
+        Debug.Log(patronObject.GetComponent<PatronScript>().patronID);
         var result = Board.PatronActivation(patronObject.GetComponent<PatronScript>().patronID);
         if (result is Success)
         {
@@ -261,7 +299,50 @@ public class GameManager : MonoBehaviour
         CleanupTavern();
         SetUpTavern();
 
-        //RefreshAgents();
+        RefreshAgents();
+        RefreshScores();
+        RefreshHand();
+
+        yield return null;
+    }
+
+    IEnumerator HandleAgent(GameObject agent)
+    {
+        var playerTag = agent.transform.parent.parent.parent.tag;
+        SerializedBoard serialize = Board.GetSerializer();
+        Debug.Log(playerTag);
+        Debug.Log(serialize.CurrentPlayer.PlayerID);
+        if (playerTag == "Player1" && serialize.CurrentPlayer.PlayerID == PlayerEnum.PLAYER1)
+        {
+            var chain = Board.ActivateAgent(agent.GetComponent<AgentScript>().GetAgent().RepresentingCard);
+            yield return StartCoroutine(ConsumeChain(chain));
+        }
+        else if (playerTag == "Player2" && serialize.CurrentPlayer.PlayerID == PlayerEnum.PLAYER1)
+        {
+            var result = Board.AttackAgent(agent.GetComponent<AgentScript>().GetAgent().RepresentingCard);
+            if (result is Failure fail)
+            {
+                Debug.Log(fail.Reason);
+            }
+        }
+        else if (playerTag == "Player2" && serialize.CurrentPlayer.PlayerID == PlayerEnum.PLAYER2)
+        {
+            var chain = Board.ActivateAgent(agent.GetComponent<AgentScript>().GetAgent().RepresentingCard);
+            yield return StartCoroutine(ConsumeChain(chain));
+        }
+        else if (playerTag == "Player1" && serialize.CurrentPlayer.PlayerID == PlayerEnum.PLAYER2)
+        {
+            var result = Board.AttackAgent(agent.GetComponent<AgentScript>().GetAgent().RepresentingCard);
+            if (result is Failure fail)
+            {
+                Debug.Log(fail.Reason);
+            }
+        }
+
+        CleanupTavern();
+        SetUpTavern();
+
+        RefreshAgents();
         RefreshScores();
         RefreshHand();
 
@@ -282,8 +363,6 @@ public class GameManager : MonoBehaviour
             }
             else if (result is Choice<Card> choice)
             {
-                if (choice.PossibleChoices.Count == 0)
-                    continue;
                 state = BoardState.CHOICE_PENDING;
                 Debug.Log("choice start");
                 CardChoiceUI.SetActive(true);
@@ -294,8 +373,6 @@ public class GameManager : MonoBehaviour
             }
             else if (result is Choice<EffectType> effectChoice)
             {
-                if (effectChoice.PossibleChoices.Count == 0)
-                    continue;
                 state = BoardState.CHOICE_PENDING;
                 Debug.Log("choice start");
                 EffectChoiceUI.SetActive(true);

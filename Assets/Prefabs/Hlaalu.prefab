@@ -10,11 +10,11 @@ GameObject:
   m_Component:
   - component: {fileID: 9205730528649964049}
   - component: {fileID: 4077381331233513894}
-  - component: {fileID: 9163554419802157688}
   - component: {fileID: 202728657033693914}
+  - component: {fileID: 9163554419802157688}
   m_Layer: 0
   m_Name: Hlaalu
-  m_TagString: Untagged
+  m_TagString: Patron
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -86,19 +86,6 @@ SpriteRenderer:
   m_WasSpriteAssigned: 1
   m_MaskInteraction: 0
   m_SpriteSortPoint: 0
---- !u!114 &9163554419802157688
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 6410107177894961650}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: b7708eff1c96f5b43be9a15be5d45f47, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  patronID: 5
 --- !u!58 &202728657033693914
 CircleCollider2D:
   m_ObjectHideFlags: 0
@@ -115,6 +102,19 @@ CircleCollider2D:
   m_Offset: {x: 0, y: 0}
   serializedVersion: 2
   m_Radius: 0.73
+--- !u!114 &9163554419802157688
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6410107177894961650}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b7708eff1c96f5b43be9a15be5d45f47, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  patronID: 5
 --- !u!1 &7165441858780056234
 GameObject:
   m_ObjectHideFlags: 0
@@ -126,7 +126,7 @@ GameObject:
   - component: {fileID: 6580132084722035520}
   m_Layer: 0
   m_Name: Hlaalu
-  m_TagString: Patron
+  m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0

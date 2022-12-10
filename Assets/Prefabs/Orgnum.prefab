@@ -14,7 +14,7 @@ GameObject:
   - component: {fileID: 5914477593467356091}
   m_Layer: 0
   m_Name: Orgnum
-  m_TagString: Untagged
+  m_TagString: Patron
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -126,7 +126,7 @@ GameObject:
   - component: {fileID: 6580132084722035520}
   m_Layer: 0
   m_Name: Orgnum
-  m_TagString: Patron
+  m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0

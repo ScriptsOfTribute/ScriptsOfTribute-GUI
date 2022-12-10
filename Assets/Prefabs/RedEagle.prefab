@@ -11,6 +11,7 @@ GameObject:
   - component: {fileID: 5482309737415893756}
   - component: {fileID: 2804789603319758744}
   - component: {fileID: 7516900942090657244}
+  - component: {fileID: 2328351009987839017}
   m_Layer: 0
   m_Name: RedEagle
   m_TagString: Patron
@@ -101,6 +102,19 @@ CircleCollider2D:
   m_Offset: {x: 0, y: 0}
   serializedVersion: 2
   m_Radius: 0.73
+--- !u!114 &2328351009987839017
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1926537857855313603}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b7708eff1c96f5b43be9a15be5d45f47, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  patronID: 7
 --- !u!1 &7165441858780056234
 GameObject:
   m_ObjectHideFlags: 0
@@ -110,7 +124,6 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 6580132084722035520}
-  - component: {fileID: 5563152468350179567}
   m_Layer: 0
   m_Name: RedEagle
   m_TagString: Untagged
@@ -135,19 +148,6 @@ Transform:
   m_Father: {fileID: 0}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &5563152468350179567
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 7165441858780056234}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: b7708eff1c96f5b43be9a15be5d45f47, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  patronID: 7
 --- !u!1 &8687179846020471850
 GameObject:
   m_ObjectHideFlags: 0

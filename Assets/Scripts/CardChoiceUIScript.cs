@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using TalesOfTribute;
+using TMPro;
 using Unity.VisualScripting;
 using UnityEngine;
 
@@ -8,6 +9,7 @@ public class CardChoiceUIScript : MonoBehaviour
 {
     public GameObject CardSlots;
     public GameObject cardPrefab;
+    public GameObject ChoiceTopic;
 
     public Choice<Card> cardChoice;
     private List<Card> choicesSelected;
@@ -21,6 +23,8 @@ public class CardChoiceUIScript : MonoBehaviour
     }
     public void SetUpChoices(Choice<Card> choice)
     {
+        Debug.Log(choice.Context.ToString());
+        ChoiceTopic.GetComponent<TextMeshProUGUI>().SetText(choice.Context.ToString() + " " + choice.MaxChoiceAmount);
         _completed = false;
         choicesSelected = new List<Card>();
         cardChoice = choice;
@@ -33,6 +37,7 @@ public class CardChoiceUIScript : MonoBehaviour
 
     void CleanUpChoices()
     {
+        ChoiceTopic.GetComponent<TextMeshProUGUI>().SetText("");
         for (int i = 0; i < CardSlots.transform.childCount; i++)
         {
             if (CardSlots.transform.GetChild(i).transform.childCount > 0)
@@ -55,6 +60,7 @@ public class CardChoiceUIScript : MonoBehaviour
         foreach(var c in choicesSelected)
             Debug.Log(c);
         var result = cardChoice.Choose(choicesSelected);
+        Debug.Log(result);
         CleanUpChoices();
         if (result is Success)
         {

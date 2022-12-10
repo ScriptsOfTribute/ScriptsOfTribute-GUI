@@ -10,8 +10,10 @@ public class CardScript : MonoBehaviour
     public TextMeshPro Cost;
     public TextMeshPro Name;
     public TextMeshPro Type;
-    public TextMeshPro Deck;
+    public SpriteRenderer Deck;
     public TextMeshPro Effects;
+
+    public Sprite[] decks;
 
     public void SetUpCardInfo(Card card)
     {
@@ -20,7 +22,7 @@ public class CardScript : MonoBehaviour
         Cost.SetText(card.Cost.ToString());
         Name.SetText(card.Name);
         Type.SetText(card.Type.ToString());
-        Deck.SetText(card.Deck.ToString());
+        Deck.sprite = decks[(int)card.Deck];
 
         string effects = "";
 
@@ -28,11 +30,11 @@ public class CardScript : MonoBehaviour
         {
             if (i == 0 && card.Effects[0] != null) //Activation
             {
-                effects += $"{card.Effects[i]}\n";
+                effects += $"{card.Effects[i].ToString()}\n";
             }
             else if (card.Effects[i] != null)
             {
-                effects += $"Combo {i + 1}: {card.Effects[i]}\n";
+                effects += $"Combo {i + 1}: {card.Effects[i].ToString()}\n";
             }
         }
 
