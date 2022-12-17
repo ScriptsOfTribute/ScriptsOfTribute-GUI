@@ -13,6 +13,8 @@ public class EffectUIScript : MonoBehaviour
     public GameObject EffectCardPrefab;
     public Choice<EffectType> effectChoice;
     private bool _completed;
+    private PlayResult endResult;
+
 
     private void Start()
     {
@@ -45,8 +47,34 @@ public class EffectUIScript : MonoBehaviour
 
     public void MakeChoice(EffectType choice)
     {
-        effectChoice.Choose(choice);
+        var result = effectChoice.Choose(choice);
         _completed = true;
         CleanUpChoices();
+        endResult = result;
+        Debug.Log(result);
+        if (result is Success)
+        {
+            _completed = true;
+        }
+        else if (result is Failure failure)
+        {
+            Debug.Log(failure.Reason);
+            _completed = true;
+        }
+        else if (result is Choice<Card>)
+        {
+            Debug.Log("chosen");
+            _completed = true;
+        }
+        else if (result is Choice<EffectType> effectChoice)
+        {
+            SetUpChoices(effectChoice);
+        }
     }
+
+    public PlayResult GetResult()
+    {
+        return endResult;
+    }
+
 }

@@ -15,6 +15,7 @@ public class CardChoiceUIScript : MonoBehaviour
     private List<Card> choicesSelected;
 
     private bool _completed;
+    private PlayResult endResult;
     private int maxSelects;
 
     private void Start()
@@ -24,7 +25,7 @@ public class CardChoiceUIScript : MonoBehaviour
     public void SetUpChoices(Choice<Card> choice)
     {
         Debug.Log(choice.Context.ToString());
-        ChoiceTopic.GetComponent<TextMeshProUGUI>().SetText(choice.Context.ToString() + " " + choice.MaxChoiceAmount);
+        ChoiceTopic.GetComponent<TextMeshProUGUI>().SetText(choice.Context.ChoiceType.ToString() + " " + choice.MaxChoiceAmount);
         _completed = false;
         choicesSelected = new List<Card>();
         cardChoice = choice;
@@ -62,6 +63,7 @@ public class CardChoiceUIScript : MonoBehaviour
         var result = cardChoice.Choose(choicesSelected);
         Debug.Log(result);
         CleanUpChoices();
+        endResult = result;
         if (result is Success)
         {
             _completed = true;
@@ -75,6 +77,15 @@ public class CardChoiceUIScript : MonoBehaviour
         {
             SetUpChoices(choice);
         }
+        else if (result is Choice<EffectType> effectChoice)
+        {
+            _completed = true;
+        }
+    }
+
+    public PlayResult GetResult()
+    {
+        return endResult;
     }
 
     public bool GetCompletedStatus()

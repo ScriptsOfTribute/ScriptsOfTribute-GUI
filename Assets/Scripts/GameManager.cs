@@ -22,9 +22,11 @@ public class GameManager : MonoBehaviour
 
     public GameObject CardChoiceUI;
     public GameObject EffectChoiceUI;
+    public GameObject EndGameUI;
 
     private BoardState state = BoardState.NORMAL;
     public static bool isUIActive = false;
+    private PlayerEnum player;
 
     void Start()
     {
@@ -44,7 +46,7 @@ public class GameManager : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        if (Input.GetMouseButtonDown(0) && state == BoardState.NORMAL && !isUIActive)
+        if (Input.GetMouseButtonDown(0) && state == BoardState.NORMAL && !isUIActive && player == Board.CurrentPlayerId)
         {
             Vector3 mousePos = Camera.main.ScreenToWorldPoint(Input.mousePosition);
             Vector2 mousePos2D = new Vector2(mousePos.x, mousePos.y);
@@ -70,13 +72,18 @@ public class GameManager : MonoBehaviour
                         break;
                 }
                 RefreshScores();
-                RefreshAgents();
             }
         }
     }
 
     public void StartTurn()
     {
+        var chain = Board.HandleStartOfTurnChoices();
+        if (chain != null)
+        {
+            StartCoroutine(ConsumeChain(chain));
+        }
+
         SerializedBoard serialize = Board.GetSerializer();
         List<Card> currentPlayerHand = Board.GetHand();
         Transform currentPlayerHandSlots = serialize.CurrentPlayer.PlayerID == PlayerEnum.PLAYER1
@@ -104,6 +111,15 @@ public class GameManager : MonoBehaviour
                 Destroy(currentPlayerHandSlots.GetChild(i).GetChild(0).gameObject);
         }
         Board.EndTurn();
+#nullable enable
+        EndGameState? endGame = Board.CheckWinner();
+        if (endGame != null)
+        {
+            EndGameUI.SetActive(true);
+            EndGameUI.GetComponent<EndGameUI>().SetUp(endGame);
+            this.enabled = false;
+        }
+#nullable disable
         RefreshScores();
         RefreshAgents();
         StartTurn();
@@ -139,14 +155,12 @@ public class GameManager : MonoBehaviour
 
         for (int i = 0; i < currentPlayerAgents.Count; i++)
         {
-            Debug.Log(currentPlayerAgents[i].RepresentingCard.ToString());
             GameObject card = Instantiate(AgentPrefab, currentPlayerAgentsSlots.GetChild(i));
             card.GetComponent<AgentScript>().SetUpCardInfo(currentPlayerAgents[i]);
         }
 
         for (int i = 0; i < enemyPlayerAgents.Count; i++)
         {
-            Debug.Log(enemyPlayerAgents[i].RepresentingCard.ToString());
             GameObject card = Instantiate(AgentPrefab, enemyAgentsSlots.GetChild(i));
             card.GetComponent<AgentScript>().SetUpCardInfo(enemyPlayerAgents[i]);
         }
@@ -361,24 +375,41 @@ public class GameManager : MonoBehaviour
             {
                 Debug.Log(failure.Reason);
             }
-            else if (result is Choice<Card> choice)
+            else if (result is BaseChoice)
             {
-                state = BoardState.CHOICE_PENDING;
-                Debug.Log("choice start");
-                CardChoiceUI.SetActive(true);
-                CardChoiceUI.GetComponent<CardChoiceUIScript>().SetUpChoices(choice);
-                yield return new WaitUntil(() => CardChoiceUI.GetComponent<CardChoiceUIScript>().GetCompletedStatus());
-                Debug.Log("choice finished");
-                CardChoiceUI.SetActive(false);
+                PlayResult tempResult = result;
+                do
+                {
+                    state = BoardState.CHOICE_PENDING;
+                    Debug.Log("choice start");
+                    Debug.Log(tempResult);
+                    if (tempResult is Choice<Card> choice)
+                    {
+                        CardChoiceUI.SetActive(true);
+                        CardChoiceUI.GetComponent<CardChoiceUIScript>().SetUpChoices(choice);
+                        yield return new WaitUntil(() => CardChoiceUI.GetComponent<CardChoiceUIScript>().GetCompletedStatus());
+                        tempResult = CardChoiceUI.GetComponent<CardChoiceUIScript>().GetResult();
+                        CardChoiceUI.SetActive(false);
+                    }
+                    else if (tempResult is Choice<EffectType> effectChoice)
+                    {
+                        EffectChoiceUI.SetActive(true);
+                        EffectChoiceUI.GetComponent<EffectUIScript>().SetUpChoices(effectChoice);
+                        yield return new WaitUntil(() => EffectChoiceUI.GetComponent<EffectUIScript>().GetCompletedStatus());
+                        tempResult = EffectChoiceUI.GetComponent<EffectUIScript>().GetResult();
+                        EffectChoiceUI.SetActive(false);
+                    }
+                    
+                    Debug.Log("choice finished");
+                    
+                } while (tempResult is not Success);
+                
             }
             else if (result is Choice<EffectType> effectChoice)
             {
                 state = BoardState.CHOICE_PENDING;
                 Debug.Log("choice start");
-                EffectChoiceUI.SetActive(true);
-                EffectChoiceUI.GetComponent<EffectUIScript>().SetUpChoices(effectChoice);
-                yield return new WaitUntil(() => EffectChoiceUI.GetComponent<EffectUIScript>().GetCompletedStatus());
-                EffectChoiceUI.SetActive(false);
+                
             }
 
         }
