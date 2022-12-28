@@ -15,7 +15,6 @@ public class CardChoiceUIScript : MonoBehaviour
     private List<Card> choicesSelected;
 
     private bool _completed;
-    private PlayResult endResult;
     private int maxSelects;
 
     private void Start()
@@ -58,34 +57,9 @@ public class CardChoiceUIScript : MonoBehaviour
 
     public void MakeChoice()
     {
-        foreach(var c in choicesSelected)
-            Debug.Log(c);
-        var result = cardChoice.Choose(choicesSelected);
-        Debug.Log(result);
+        GameManager.Board.MakeChoice<Card>(choicesSelected);
         CleanUpChoices();
-        endResult = result;
-        if (result is Success)
-        {
-            _completed = true;
-        }
-        else if (result is Failure failure)
-        {
-            Debug.Log(failure.Reason);
-            _completed = true;
-        }
-        else if (result is Choice<Card> choice)
-        {
-            SetUpChoices(choice);
-        }
-        else if (result is Choice<EffectType> effectChoice)
-        {
-            _completed = true;
-        }
-    }
-
-    public PlayResult GetResult()
-    {
-        return endResult;
+        _completed = true;
     }
 
     public bool GetCompletedStatus()

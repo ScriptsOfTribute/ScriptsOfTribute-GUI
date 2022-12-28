@@ -10,7 +10,11 @@ public class DrawPileButton : MonoBehaviour
 
     public void OnClick()
     {
-        CardShowUI.GetComponent<CardShowUIScript>().cards = GameManager.Board.GetDrawPile(playerId).ToArray();
+        var serializer = GameManager.Board.GetSerializer();
+        if (serializer.CurrentPlayer.PlayerID == playerId)
+            CardShowUI.GetComponent<CardShowUIScript>().cards = serializer.CurrentPlayer.DrawPile.ToArray();
+        else
+            CardShowUI.GetComponent<CardShowUIScript>().cards = serializer.EnemyPlayer.DrawPile.ToArray();
         GameManager.isUIActive = true;
         CardShowUI.SetActive(true);
     }

@@ -11,7 +11,7 @@ public class EffectUIScript : MonoBehaviour
     public GameObject Right;
 
     public GameObject EffectCardPrefab;
-    public Choice<EffectType> effectChoice;
+    public Choice<Effect> effectChoice;
     private bool _completed;
     private PlayResult endResult;
 
@@ -26,7 +26,7 @@ public class EffectUIScript : MonoBehaviour
         return _completed;
     }
 
-    public void SetUpChoices(Choice<EffectType> choice)
+    public void SetUpChoices(Choice<Effect> choice)
     {
         effectChoice = choice;
         _completed = false;
@@ -45,36 +45,12 @@ public class EffectUIScript : MonoBehaviour
             Destroy(Right.transform.GetChild(0).gameObject);
     }
 
-    public void MakeChoice(EffectType choice)
+    public void MakeChoice(Effect effect)
     {
-        var result = effectChoice.Choose(choice);
-        _completed = true;
+        GameManager.Board.MakeChoice<Effect>(effect);
         CleanUpChoices();
-        endResult = result;
-        Debug.Log(result);
-        if (result is Success)
-        {
-            _completed = true;
-        }
-        else if (result is Failure failure)
-        {
-            Debug.Log(failure.Reason);
-            _completed = true;
-        }
-        else if (result is Choice<Card>)
-        {
-            Debug.Log("chosen");
-            _completed = true;
-        }
-        else if (result is Choice<EffectType> effectChoice)
-        {
-            SetUpChoices(effectChoice);
-        }
+        _completed = true;
     }
 
-    public PlayResult GetResult()
-    {
-        return endResult;
-    }
 
 }

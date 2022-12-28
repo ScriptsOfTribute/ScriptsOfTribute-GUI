@@ -11,7 +11,7 @@ GameObject:
   - component: {fileID: 7618807282539974736}
   - component: {fileID: 7592510874627059800}
   - component: {fileID: 4229208531532073376}
-  - component: {fileID: 1105067797570317781}
+  - component: {fileID: 6168212590661536944}
   m_Layer: 0
   m_Name: DukeOfCrows
   m_TagString: Patron
@@ -102,7 +102,7 @@ CircleCollider2D:
   m_Offset: {x: 0, y: 0}
   serializedVersion: 2
   m_Radius: 0.73
---- !u!114 &1105067797570317781
+--- !u!114 &6168212590661536944
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}

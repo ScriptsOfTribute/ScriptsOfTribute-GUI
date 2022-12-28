@@ -15,13 +15,14 @@ public class AgentScript : MonoBehaviour
     public TextMeshPro Effects;
     public TextMeshPro HP;
     public SpriteRenderer activate;
-
     public Sprite[] decks;
 
-    public void SetUpCardInfo(SerializedAgent card)
+    private PlayerEnum _owner;
+
+    public void SetUpCardInfo(SerializedAgent card, PlayerEnum owner)
     {
         _agent = card;
-
+        _owner = owner;
         Cost.SetText(card.RepresentingCard.Cost.ToString());
         Name.SetText(card.RepresentingCard.Name);
         Type.SetText(card.RepresentingCard.Type.ToString());
@@ -49,6 +50,11 @@ public class AgentScript : MonoBehaviour
     public SerializedAgent GetAgent()
     {
         return _agent;
+    }
+    
+    public PlayerEnum GetOwner()
+    {
+        return _owner;
     }
 
 }

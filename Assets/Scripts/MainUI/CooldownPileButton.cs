@@ -10,7 +10,11 @@ public class CooldownPileButton : MonoBehaviour
 
     public void OnClick()
     {
-        CardShowUI.GetComponent<CardShowUIScript>().cards = GameManager.Board.GetCooldownPile(playerId).ToArray();
+        var serializer = GameManager.Board.GetSerializer();
+        if (serializer.CurrentPlayer.PlayerID == playerId)
+            CardShowUI.GetComponent<CardShowUIScript>().cards = serializer.CurrentPlayer.CooldownPile.ToArray();
+        else
+            CardShowUI.GetComponent<CardShowUIScript>().cards = serializer.EnemyPlayer.CooldownPile.ToArray();
         GameManager.isUIActive = true;
         CardShowUI.SetActive(true);
     }

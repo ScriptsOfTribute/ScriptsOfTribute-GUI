@@ -10,7 +10,11 @@ public class PlayedButton : MonoBehaviour
 
     public void OnClick()
     {
-        CardShowUI.GetComponent<CardShowUIScript>().cards = GameManager.Board.GetPlayedCards(playerId).ToArray();
+        var serializer = GameManager.Board.GetSerializer();
+        if (serializer.CurrentPlayer.PlayerID == playerId)
+            CardShowUI.GetComponent<CardShowUIScript>().cards = serializer.CurrentPlayer.Played.ToArray();
+        else
+            CardShowUI.GetComponent<CardShowUIScript>().cards = serializer.EnemyPlayer.Played.ToArray();
         GameManager.isUIActive = true;
         CardShowUI.SetActive(true);
     }

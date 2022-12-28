@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using TalesOfTribute;
 using TalesOfTribute.Board;
 using TalesOfTribute.Serializers;
@@ -23,10 +24,10 @@ public class GameManager : MonoBehaviour
     public GameObject CardChoiceUI;
     public GameObject EffectChoiceUI;
     public GameObject EndGameUI;
+    public GameObject MoveText;
 
-    private BoardState state = BoardState.NORMAL;
     public static bool isUIActive = false;
-    private PlayerEnum player;
+    public PlayerEnum player = PlayerEnum.PLAYER1;
 
     void Start()
     {
@@ -38,15 +39,14 @@ public class GameManager : MonoBehaviour
             var slot = Patrons.transform.GetChild(i);
             Instantiate(PatronsPrefabs[(int)patrons[i]], slot);
         }
-
-        SetUpTavern();
+        RefreshBoard();
         StartTurn();
     }
 
     // Update is called once per frame
     void Update()
     {
-        if (Input.GetMouseButtonDown(0) && state == BoardState.NORMAL && !isUIActive && player == Board.CurrentPlayerId)
+        if (Input.GetMouseButtonDown(0) && !isUIActive && player == Board.CurrentPlayerId)
         {
             Vector3 mousePos = Camera.main.ScreenToWorldPoint(Input.mousePosition);
             Vector2 mousePos2D = new Vector2(mousePos.x, mousePos.y);
@@ -71,69 +71,79 @@ public class GameManager : MonoBehaviour
                         StartCoroutine(HandleAgent(hit.collider.gameObject));
                         break;
                 }
-                RefreshScores();
+            }
+            StartCoroutine(HandleChoice());
+        }
+    }
+
+    void RefreshBoard()
+    {
+        SerializedBoard board = Board.GetSerializer();
+        for(int i = 0; i < Patrons.transform.childCount; i++)
+        {
+            var patronObject = Patrons.transform.GetChild(i).GetChild(0).gameObject;
+            if (patronObject.transform.childCount > 1) // Only treasury has one bcs it has no arrow
+            {
+                var patronID = patronObject.transform.GetChild(1).gameObject.GetComponent<PatronScript>().patronID;
+                var arrow = patronObject.transform.GetChild(0);
+                var favor = board.PatronStates.GetFor(patronID);
+                switch (favor)
+                {
+                    case PlayerEnum.PLAYER1:
+                        arrow.transform.rotation = Quaternion.Euler(0f, 0f, 270f);
+                        break;
+                    case PlayerEnum.NO_PLAYER_SELECTED:
+                        arrow.transform.rotation = Quaternion.Euler(0f, 0f, 180f);
+                        break;
+                    case PlayerEnum.PLAYER2:
+                        arrow.transform.rotation = Quaternion.Euler(0f, 0f, 90f);
+                        break;
+                }
             }
         }
+
+        RefreshAgents(board);
+        RefreshScores(board);
+        RefreshHand(board);
+        SetUpTavern(board);
     }
 
     public void StartTurn()
     {
-        var chain = Board.HandleStartOfTurnChoices();
-        if (chain != null)
+        if (Board.PendingChoice != null)
         {
-            StartCoroutine(ConsumeChain(chain));
+            StartCoroutine(HandleChoice());
         }
-
-        SerializedBoard serialize = Board.GetSerializer();
-        List<Card> currentPlayerHand = Board.GetHand();
-        Transform currentPlayerHandSlots = serialize.CurrentPlayer.PlayerID == PlayerEnum.PLAYER1
-                                    ? Player1.transform.GetChild(0) //0th idx is Hand, 1st is Agents
-                                    : Player2.transform.GetChild(0);
-
-        for (int i = 0; i < currentPlayerHandSlots.childCount; i++)
-        {
-            GameObject card = Instantiate(CardPrefab, currentPlayerHandSlots.GetChild(i));
-            card.GetComponent<CardScript>().SetUpCardInfo(currentPlayerHand[i]);
-        }
-        RefreshScores();
+        
     }
 
     public void EndTurn()
     {
-        SerializedBoard serialize = Board.GetSerializer();
-        Transform currentPlayerHandSlots = serialize.CurrentPlayer.PlayerID == PlayerEnum.PLAYER1
-                                    ? Player1.transform.GetChild(0) //0th idx is Hand, 1st is Agents
-                                    : Player2.transform.GetChild(0);
-
-        for (int i = 0; i < currentPlayerHandSlots.childCount; i++)
-        {
-            if (currentPlayerHandSlots.GetChild(i).childCount > 0)
-                Destroy(currentPlayerHandSlots.GetChild(i).GetChild(0).gameObject);
-        }
         Board.EndTurn();
 #nullable enable
         EndGameState? endGame = Board.CheckWinner();
         if (endGame != null)
-        {
-            EndGameUI.SetActive(true);
-            EndGameUI.GetComponent<EndGameUI>().SetUp(endGame);
-            this.enabled = false;
-        }
+            EndGame(endGame);
 #nullable disable
-        RefreshScores();
-        RefreshAgents();
+        RefreshBoard();
         StartTurn();
     }
 
-    void RefreshAgents()
+    void EndGame(EndGameState state)
     {
-        SerializedBoard serialize = Board.GetSerializer();
-        List<SerializedAgent> currentPlayerAgents = serialize.CurrentPlayer.Agents;
-        List<SerializedAgent> enemyPlayerAgents = serialize.EnemyPlayer.Agents;
-        Transform currentPlayerAgentsSlots = serialize.CurrentPlayer.PlayerID == PlayerEnum.PLAYER1
+        EndGameUI.SetActive(true);
+        EndGameUI.GetComponent<EndGameUI>().SetUp(state);
+        this.enabled = false;
+    }
+
+    void RefreshAgents(SerializedBoard board)
+    {
+        List<SerializedAgent> currentPlayerAgents = board.CurrentPlayer.Agents;
+        List<SerializedAgent> enemyPlayerAgents = board.EnemyPlayer.Agents;
+        Transform currentPlayerAgentsSlots = board.CurrentPlayer.PlayerID == PlayerEnum.PLAYER1
                                     ? Player1.transform.GetChild(1) //0th idx is Hand, 1st is Agents
                                     : Player2.transform.GetChild(1);
-        Transform enemyAgentsSlots = serialize.CurrentPlayer.PlayerID == PlayerEnum.PLAYER1
+        Transform enemyAgentsSlots = board.CurrentPlayer.PlayerID == PlayerEnum.PLAYER1
                                     ? Player2.transform.GetChild(1) //0th idx is Hand, 1st is Agents
                                     : Player1.transform.GetChild(1);
 
@@ -142,7 +152,7 @@ public class GameManager : MonoBehaviour
             if (currentPlayerAgentsSlots.GetChild(i).childCount > 0)
             {
                 Destroy(currentPlayerAgentsSlots.GetChild(i).GetChild(0).gameObject);
-            }                
+            }
         }
 
         for (int i = 0; i < enemyAgentsSlots.childCount; i++)
@@ -156,19 +166,19 @@ public class GameManager : MonoBehaviour
         for (int i = 0; i < currentPlayerAgents.Count; i++)
         {
             GameObject card = Instantiate(AgentPrefab, currentPlayerAgentsSlots.GetChild(i));
-            card.GetComponent<AgentScript>().SetUpCardInfo(currentPlayerAgents[i]);
+            card.GetComponent<AgentScript>().SetUpCardInfo(currentPlayerAgents[i], board.CurrentPlayer.PlayerID);
         }
 
         for (int i = 0; i < enemyPlayerAgents.Count; i++)
         {
             GameObject card = Instantiate(AgentPrefab, enemyAgentsSlots.GetChild(i));
-            card.GetComponent<AgentScript>().SetUpCardInfo(enemyPlayerAgents[i]);
+            card.GetComponent<AgentScript>().SetUpCardInfo(enemyPlayerAgents[i], board.EnemyPlayer.PlayerID);
         }
     }
 
-    public void RefreshScores()
+    public void RefreshScores(SerializedBoard board)
     {
-        SerializedPlayer player = Board.GetPlayer(PlayerEnum.PLAYER1);
+        SerializedPlayer player = board.CurrentPlayer.PlayerID == PlayerEnum.PLAYER1 ? board.CurrentPlayer : board.EnemyPlayer;
 
         string text = $"Gold: {player.Coins}\n" +
                     $"Prestige: {player.Prestige}\n" +
@@ -176,7 +186,7 @@ public class GameManager : MonoBehaviour
 
         Player1Score.GetComponent<TextMeshProUGUI>().SetText(text);
 
-        player = Board.GetPlayer(PlayerEnum.PLAYER2);
+        player = board.CurrentPlayer.PlayerID == PlayerEnum.PLAYER2 ? board.CurrentPlayer : board.EnemyPlayer;
 
         text = $"Gold: {player.Coins}\n" +
                 $"Prestige: {player.Prestige}\n" +
@@ -185,9 +195,10 @@ public class GameManager : MonoBehaviour
         Player2Score.GetComponent<TextMeshProUGUI>().SetText(text);
     }
 
-    void SetUpTavern()
+    void SetUpTavern(SerializedBoard board)
     {
-        List<Card> cards = Board.GetTavern();
+        CleanupTavern();
+        List<Card> cards = board.TavernAvailableCards;
         for (int i = 0; i < Tavern.transform.childCount; i++)
         {
             GameObject card = Instantiate(CardPrefab, Tavern.transform.GetChild(i));
@@ -205,19 +216,24 @@ public class GameManager : MonoBehaviour
         }
     }
 
-    void RefreshHand()
+    void RefreshHand(SerializedBoard board)
     {
-        SerializedBoard serialize = Board.GetSerializer();
-        Transform currentPlayerHandSlots = serialize.CurrentPlayer.PlayerID == PlayerEnum.PLAYER1
+        Transform currentPlayerHandSlots = board.CurrentPlayer.PlayerID == PlayerEnum.PLAYER1
                                     ? Player1.transform.GetChild(0) //0th idx is Hand, 1st is Agents
                                     : Player2.transform.GetChild(0);
 
-        for (int i = 0; i < currentPlayerHandSlots.childCount; i++)
+        for (int i = 0; i < Player1.transform.GetChild(0).childCount; i++)
         {
-            if (currentPlayerHandSlots.GetChild(i).childCount > 0)
-                Destroy(currentPlayerHandSlots.GetChild(i).GetChild(0).gameObject);
+            if (Player1.transform.GetChild(0).GetChild(i).childCount > 0)
+                Destroy(Player1.transform.GetChild(0).GetChild(i).GetChild(0).gameObject);
         }
-        List<Card> currentPlayerHand = Board.GetHand();
+
+        for (int i = 0; i < Player2.transform.GetChild(0).childCount; i++)
+        {
+            if (Player2.transform.GetChild(0).GetChild(i).childCount > 0)
+                Destroy(Player2.transform.GetChild(0).GetChild(i).GetChild(0).gameObject);
+        }
+        List<Card> currentPlayerHand = board.CurrentPlayer.Hand;
         for (int i = 0; i < currentPlayerHand.Count; i++)
         {
             GameObject card = Instantiate(CardPrefab, currentPlayerHandSlots.GetChild(i));
@@ -225,195 +241,157 @@ public class GameManager : MonoBehaviour
         }
     }
 
-    IEnumerator PlayCard(GameObject card)
+    IEnumerator PlayCard(GameObject CardObject)
     {
-        Debug.Log(card.GetComponent<CardScript>().GetCard());
-        var chain = Board.PlayCard(card.GetComponent<CardScript>().GetCard());
-        yield return StartCoroutine(ConsumeChain(chain));
-        Destroy(card);
-
-        CleanupTavern();
-        SetUpTavern();
-
-        RefreshScores();
-        RefreshHand();
-        RefreshAgents();
-
-
+        var card = CardObject.GetComponent<CardScript>().GetCard();
+        Debug.Log(card);
+        Board.PlayCard(card);
+        RefreshBoard();
         yield return null;
     }
 
-    IEnumerator BuyCard(GameObject card)
+    IEnumerator BuyCard(GameObject CardObject)
     {
-        Debug.Log(card.GetComponent<CardScript>().GetCard());
-        var chain = Board.BuyCard(card.GetComponent<CardScript>().GetCard());
-        yield return StartCoroutine(ConsumeChain(chain));
-        Destroy(card);
-
-        CleanupTavern();
-        SetUpTavern();
-
-        RefreshScores();
-        RefreshHand();
-        RefreshAgents();
-
+        var card = CardObject.GetComponent<CardScript>().GetCard();
+        Debug.Log(card);
+        Board.BuyCard(card);
+        RefreshBoard();
         yield return null;
     }
 
-    IEnumerator PatronActivation(GameObject patronObject)
+    IEnumerator PatronActivation(GameObject PatronObject)
     {
-        Debug.Log(patronObject.GetComponent<PatronScript>().patronID);
-        var result = Board.PatronActivation(patronObject.GetComponent<PatronScript>().patronID);
-        if (result is Success)
+        var patronID = PatronObject.GetComponent<PatronScript>().patronID;
+        Debug.Log(patronID);
+        Board.PatronActivation(patronID);
+        RefreshBoard();
+        yield return null;
+    }
+
+    IEnumerator HandleAgent(GameObject AgentObject)
+    {
+        var agent = AgentObject.GetComponent<AgentScript>().GetAgent();
+        var owner = AgentObject.GetComponent<AgentScript>().GetOwner();
+        Debug.Log(agent.ToString());
+        Debug.Log(owner);
+        if (owner == Board.CurrentPlayerId)
         {
-            // All fine
+            Board.ActivateAgent(agent.RepresentingCard);
         }
-        else if (result is Failure failure)
+        else if (owner == Board.EnemyPlayerId)
         {
-            Debug.Log(failure.Reason);
+            var result = Board.AttackAgent(AgentObject.GetComponent<AgentScript>().GetAgent().RepresentingCard);
+            if (result is Failure fail)
+            {
+                Debug.Log(fail.Reason);
+            }
         }
-        else if (result is Choice<Card> choice)
+        yield return null;
+    }
+
+    IEnumerator HandleChoice()
+    {
+        BaseSerializedChoice? pendingChoice = Board.PendingChoice;
+        while (pendingChoice != null)
         {
-            state = BoardState.CHOICE_PENDING;
-            Debug.Log("choice start");
+            yield return StartCoroutine(HandleSingleChoice(pendingChoice.ToChoice()));
+            pendingChoice = Board.PendingChoice;
+        }
+
+        yield return null;
+        RefreshBoard();
+        yield return null;
+    }
+
+    IEnumerator HandleSingleChoice(BaseChoice choice)
+    {
+        Debug.Log(choice);
+        isUIActive = true;
+        if (choice is Choice<Card> cardChoice)
+        {
             CardChoiceUI.SetActive(true);
-            CardChoiceUI.GetComponent<CardChoiceUIScript>().SetUpChoices(choice);
+            CardChoiceUI.GetComponent<CardChoiceUIScript>().SetUpChoices(cardChoice);
             yield return new WaitUntil(() => CardChoiceUI.GetComponent<CardChoiceUIScript>().GetCompletedStatus());
-            Debug.Log("choice finished");
             CardChoiceUI.SetActive(false);
         }
-        else if (result is Choice<EffectType> effectChoice)
+        else if (choice is Choice<Effect> effectChoice)
         {
-            state = BoardState.CHOICE_PENDING;
-            Debug.Log("choice start");
             EffectChoiceUI.SetActive(true);
             EffectChoiceUI.GetComponent<EffectUIScript>().SetUpChoices(effectChoice);
             yield return new WaitUntil(() => EffectChoiceUI.GetComponent<EffectUIScript>().GetCompletedStatus());
             EffectChoiceUI.SetActive(false);
         }
-        state = BoardState.NORMAL;
-        if (patronObject.GetComponent<PatronScript>().patronID != PatronId.TREASURY)
-        {
-            var arrow = patronObject.transform.parent.transform.GetChild(0);
-            var favor = Board.GetLevelOfFavoritism(patronObject.GetComponent<PatronScript>().patronID);
-            switch (favor)
-            {
-                case PlayerEnum.PLAYER1:
-                    arrow.transform.rotation = Quaternion.Euler(0f, 0f, 270f);
-                    break;
-                case PlayerEnum.NO_PLAYER_SELECTED:
-                    arrow.transform.rotation = Quaternion.Euler(0f, 0f, 180f);
-                    break;
-                case PlayerEnum.PLAYER2:
-                    arrow.transform.rotation = Quaternion.Euler(0f, 0f, 90f);
-                    break;
-            }
-
-        }
-        CleanupTavern();
-        SetUpTavern();
-
-        RefreshAgents();
-        RefreshScores();
-        RefreshHand();
-
+        Debug.Log("Choice finished");
+        isUIActive = false;
         yield return null;
     }
 
-    IEnumerator HandleAgent(GameObject agent)
+
+    public IEnumerator PlayBotMove()
     {
-        var playerTag = agent.transform.parent.parent.parent.tag;
-        SerializedBoard serialize = Board.GetSerializer();
-        Debug.Log(playerTag);
-        Debug.Log(serialize.CurrentPlayer.PlayerID);
-        if (playerTag == "Player1" && serialize.CurrentPlayer.PlayerID == PlayerEnum.PLAYER1)
-        {
-            var chain = Board.ActivateAgent(agent.GetComponent<AgentScript>().GetAgent().RepresentingCard);
-            yield return StartCoroutine(ConsumeChain(chain));
-        }
-        else if (playerTag == "Player2" && serialize.CurrentPlayer.PlayerID == PlayerEnum.PLAYER1)
-        {
-            var result = Board.AttackAgent(agent.GetComponent<AgentScript>().GetAgent().RepresentingCard);
-            if (result is Failure fail)
-            {
-                Debug.Log(fail.Reason);
-            }
-        }
-        else if (playerTag == "Player2" && serialize.CurrentPlayer.PlayerID == PlayerEnum.PLAYER2)
-        {
-            var chain = Board.ActivateAgent(agent.GetComponent<AgentScript>().GetAgent().RepresentingCard);
-            yield return StartCoroutine(ConsumeChain(chain));
-        }
-        else if (playerTag == "Player1" && serialize.CurrentPlayer.PlayerID == PlayerEnum.PLAYER2)
-        {
-            var result = Board.AttackAgent(agent.GetComponent<AgentScript>().GetAgent().RepresentingCard);
-            if (result is Failure fail)
-            {
-                Debug.Log(fail.Reason);
-            }
-        }
-
-        CleanupTavern();
-        SetUpTavern();
-
-        RefreshAgents();
-        RefreshScores();
-        RefreshHand();
-
-        yield return null;
+        var move = UnityRandomBot.Instance.Play(Board.GetSerializer(), Board.GetListOfPossibleMoves());
+        MoveText.GetComponent<TextMeshProUGUI>().text = move.ToString();
+        yield return StartCoroutine(MoveBot(move));
     }
 
-    IEnumerator ConsumeChain(ExecutionChain chain)
+    IEnumerator MoveBot(Move move)
     {
-        foreach (var result in chain.Consume())
-        {
-            if (result is Success)
-            {
-                continue; // All fine
-            }
-            else if (result is Failure failure)
-            {
-                Debug.Log(failure.Reason);
-            }
-            else if (result is BaseChoice)
-            {
-                PlayResult tempResult = result;
-                do
-                {
-                    state = BoardState.CHOICE_PENDING;
-                    Debug.Log("choice start");
-                    Debug.Log(tempResult);
-                    if (tempResult is Choice<Card> choice)
-                    {
-                        CardChoiceUI.SetActive(true);
-                        CardChoiceUI.GetComponent<CardChoiceUIScript>().SetUpChoices(choice);
-                        yield return new WaitUntil(() => CardChoiceUI.GetComponent<CardChoiceUIScript>().GetCompletedStatus());
-                        tempResult = CardChoiceUI.GetComponent<CardChoiceUIScript>().GetResult();
-                        CardChoiceUI.SetActive(false);
-                    }
-                    else if (tempResult is Choice<EffectType> effectChoice)
-                    {
-                        EffectChoiceUI.SetActive(true);
-                        EffectChoiceUI.GetComponent<EffectUIScript>().SetUpChoices(effectChoice);
-                        yield return new WaitUntil(() => EffectChoiceUI.GetComponent<EffectUIScript>().GetCompletedStatus());
-                        tempResult = EffectChoiceUI.GetComponent<EffectUIScript>().GetResult();
-                        EffectChoiceUI.SetActive(false);
-                    }
-                    
-                    Debug.Log("choice finished");
-                    
-                } while (tempResult is not Success);
-                
-            }
-            else if (result is Choice<EffectType> effectChoice)
-            {
-                state = BoardState.CHOICE_PENDING;
-                Debug.Log("choice start");
-                
-            }
-
-        }
-        state = BoardState.NORMAL;
+        ParseMove(move);
         yield return null;
     }
+
+    void ParseMove(Move move)
+    {
+        if (move.Command == CommandEnum.END_TURN)
+        {
+            Debug.Log(move.ToString());
+            EndTurn();
+            return;
+        }
+        else if (move.Command == CommandEnum.PLAY_CARD)
+        {
+            var m = move as SimpleCardMove;
+            Board.PlayCard(m.Card);
+        }
+        else if (move.Command == CommandEnum.ATTACK)
+        {
+            var m = move as SimpleCardMove;
+            var result = Board.AttackAgent(m.Card);
+            if (result is Failure f)
+            {
+                EndGame(new EndGameState(Board.EnemyPlayerId, GameEndReason.INCORRECT_MOVE, f.Reason));
+            }
+        }
+        else if (move.Command == CommandEnum.BUY_CARD)
+        {
+            var m = move as SimpleCardMove;
+            Board.BuyCard(m.Card);
+        }
+        else if (move.Command == CommandEnum.ACTIVATE_AGENT)
+        {
+            var m = move as SimpleCardMove;
+            Board.ActivateAgent(m.Card);
+        }
+        else if (move.Command == CommandEnum.CALL_PATRON)
+        {
+            var m = move as SimplePatronMove;
+            Board.PatronActivation(m.PatronId);
+        }
+        else if (move.Command == CommandEnum.MAKE_CHOICE)
+        {
+            if (move is MakeChoiceMove<Card> cardChoice)
+            {
+                Debug.Log($"CHOICE: {string.Join(',', cardChoice.Choices.Select(c => c.Name))}");
+                Board.MakeChoice(cardChoice.Choices);
+            }
+            else if (move is MakeChoiceMove<Effect> effectChoice)
+            {
+                Debug.Log($"CHOICE: {string.Join(',', effectChoice.Choices.Select(e => e.Type))}");
+                Board.MakeChoice(effectChoice.Choices);
+            }
+        }
+
+        RefreshBoard();
+    }
+
 }

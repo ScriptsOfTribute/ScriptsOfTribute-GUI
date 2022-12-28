@@ -6,7 +6,7 @@ using TMPro;
 
 public class EffectButtonUIScript : MonoBehaviour
 {
-    private EffectType _effect;
+    private Effect _effect;
     public GameObject description;
 
     public void OnClick()
@@ -14,7 +14,7 @@ public class EffectButtonUIScript : MonoBehaviour
         Debug.Log(_effect);
         FindObjectOfType<EffectUIScript>().MakeChoice(_effect);
     }
-    public void SetUpEffectInfo(EffectType effect)
+    public void SetUpEffectInfo(Effect effect)
     {
         _effect = effect;
 
