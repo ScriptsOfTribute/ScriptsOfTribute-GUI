@@ -1,18 +1,27 @@
 using System.Collections;
 using System.Collections.Generic;
+using TalesOfTribute;
 using UnityEngine;
 
 public class PlayerScript : MonoBehaviour
 {
-    // Start is called before the first frame update
-    void Start()
+    public static PlayerScript Instance;
+    public PlayerEnum playerID { get; private set; }
+    private void Awake()
     {
-        
+        if (Instance != null && Instance != this)
+        {
+            Destroy(this);
+        }
+        else
+        {
+            Instance = this;
+        }
+        playerID = PlayerEnum.PLAYER1;
     }
 
-    // Update is called once per frame
-    void Update()
+    public void SetSide(PlayerEnum id)
     {
-        
+        this.playerID = id;
     }
 }

@@ -6,11 +6,12 @@ using TalesOfTribute;
 public class PlayedButton : MonoBehaviour
 {
     public GameObject CardShowUI;
-    public PlayerEnum playerId;
+    public bool isBot;
 
     public void OnClick()
     {
         var serializer = GameManager.Board.GetSerializer();
+        var playerId = isBot ? TalesOfTributeAI.Instance.botID : PlayerScript.Instance.playerID;
         if (serializer.CurrentPlayer.PlayerID == playerId)
             CardShowUI.GetComponent<CardShowUIScript>().cards = serializer.CurrentPlayer.Played.ToArray();
         else

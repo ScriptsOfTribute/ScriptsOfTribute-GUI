@@ -23,7 +23,6 @@ public class CardChoiceUIScript : MonoBehaviour
     }
     public void SetUpChoices(Choice<Card> choice)
     {
-        Debug.Log(choice.Context.ToString());
         ChoiceTopic.GetComponent<TextMeshProUGUI>().SetText(choice.Context.ChoiceType.ToString() + " " + choice.MaxChoiceAmount);
         _completed = false;
         choicesSelected = new List<Card>();

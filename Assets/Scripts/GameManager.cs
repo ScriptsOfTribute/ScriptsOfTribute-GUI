@@ -27,7 +27,7 @@ public class GameManager : MonoBehaviour
     public GameObject MoveText;
 
     public static bool isUIActive = false;
-    public PlayerEnum player = PlayerEnum.PLAYER1;
+    public static bool isBotPlaying = false;
 
     void Start()
     {
@@ -46,7 +46,7 @@ public class GameManager : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        if (Input.GetMouseButtonDown(0) && !isUIActive && player == Board.CurrentPlayerId)
+        if (Input.GetMouseButtonDown(0) && !isUIActive && PlayerScript.Instance.playerID == Board.CurrentPlayerId)
         {
             Vector3 mousePos = Camera.main.ScreenToWorldPoint(Input.mousePosition);
             Vector2 mousePos2D = new Vector2(mousePos.x, mousePos.y);
@@ -79,26 +79,27 @@ public class GameManager : MonoBehaviour
     void RefreshBoard()
     {
         SerializedBoard board = Board.GetSerializer();
+        uint patronCalls = board.CurrentPlayer.PatronCalls;
         for(int i = 0; i < Patrons.transform.childCount; i++)
         {
             var patronObject = Patrons.transform.GetChild(i).GetChild(0).gameObject;
             if (patronObject.transform.childCount > 1) // Only treasury has one bcs it has no arrow
             {
+                patronObject.transform.GetChild(1).gameObject.GetComponent<SpriteRenderer>().color = patronCalls == 0 ? Color.gray : Color.white;
+
                 var patronID = patronObject.transform.GetChild(1).gameObject.GetComponent<PatronScript>().patronID;
                 var arrow = patronObject.transform.GetChild(0);
                 var favor = board.PatronStates.GetFor(patronID);
-                switch (favor)
-                {
-                    case PlayerEnum.PLAYER1:
+                if (favor == PlayerScript.Instance.playerID)
                         arrow.transform.rotation = Quaternion.Euler(0f, 0f, 270f);
-                        break;
-                    case PlayerEnum.NO_PLAYER_SELECTED:
+                else if (favor == PlayerEnum.NO_PLAYER_SELECTED)
                         arrow.transform.rotation = Quaternion.Euler(0f, 0f, 180f);
-                        break;
-                    case PlayerEnum.PLAYER2:
-                        arrow.transform.rotation = Quaternion.Euler(0f, 0f, 90f);
-                        break;
-                }
+                else if (favor == TalesOfTributeAI.Instance.botID)
+                    arrow.transform.rotation = Quaternion.Euler(0f, 0f, 90f);
+            }
+            else if (patronObject.transform.childCount == 1)
+            {
+                patronObject.transform.GetChild(0).gameObject.GetComponent<SpriteRenderer>().color = patronCalls == 0 ? Color.gray : Color.white;
             }
         }
 
@@ -110,7 +111,8 @@ public class GameManager : MonoBehaviour
 
     public void StartTurn()
     {
-        if (Board.PendingChoice != null)
+        isBotPlaying = Board.CurrentPlayerId != PlayerScript.Instance.playerID;
+        if (Board.PendingChoice != null && !isBotPlaying)
         {
             StartCoroutine(HandleChoice());
         }
@@ -140,10 +142,10 @@ public class GameManager : MonoBehaviour
     {
         List<SerializedAgent> currentPlayerAgents = board.CurrentPlayer.Agents;
         List<SerializedAgent> enemyPlayerAgents = board.EnemyPlayer.Agents;
-        Transform currentPlayerAgentsSlots = board.CurrentPlayer.PlayerID == PlayerEnum.PLAYER1
+        Transform currentPlayerAgentsSlots = board.CurrentPlayer.PlayerID == PlayerScript.Instance.playerID
                                     ? Player1.transform.GetChild(1) //0th idx is Hand, 1st is Agents
                                     : Player2.transform.GetChild(1);
-        Transform enemyAgentsSlots = board.CurrentPlayer.PlayerID == PlayerEnum.PLAYER1
+        Transform enemyAgentsSlots = board.CurrentPlayer.PlayerID == PlayerScript.Instance.playerID
                                     ? Player2.transform.GetChild(1) //0th idx is Hand, 1st is Agents
                                     : Player1.transform.GetChild(1);
 
@@ -178,7 +180,7 @@ public class GameManager : MonoBehaviour
 
     public void RefreshScores(SerializedBoard board)
     {
-        SerializedPlayer player = board.CurrentPlayer.PlayerID == PlayerEnum.PLAYER1 ? board.CurrentPlayer : board.EnemyPlayer;
+        SerializedPlayer player = board.CurrentPlayer.PlayerID == PlayerScript.Instance.playerID ? board.CurrentPlayer : board.EnemyPlayer;
 
         string text = $"Gold: {player.Coins}\n" +
                     $"Prestige: {player.Prestige}\n" +
@@ -186,7 +188,7 @@ public class GameManager : MonoBehaviour
 
         Player1Score.GetComponent<TextMeshProUGUI>().SetText(text);
 
-        player = board.CurrentPlayer.PlayerID == PlayerEnum.PLAYER2 ? board.CurrentPlayer : board.EnemyPlayer;
+        player = board.CurrentPlayer.PlayerID == TalesOfTributeAI.Instance.botID ? board.CurrentPlayer : board.EnemyPlayer;
 
         text = $"Gold: {player.Coins}\n" +
                 $"Prestige: {player.Prestige}\n" +
@@ -218,7 +220,7 @@ public class GameManager : MonoBehaviour
 
     void RefreshHand(SerializedBoard board)
     {
-        Transform currentPlayerHandSlots = board.CurrentPlayer.PlayerID == PlayerEnum.PLAYER1
+        Transform currentPlayerHandSlots = board.CurrentPlayer.PlayerID == PlayerScript.Instance.playerID
                                     ? Player1.transform.GetChild(0) //0th idx is Hand, 1st is Agents
                                     : Player2.transform.GetChild(0);
 
@@ -244,7 +246,6 @@ public class GameManager : MonoBehaviour
     IEnumerator PlayCard(GameObject CardObject)
     {
         var card = CardObject.GetComponent<CardScript>().GetCard();
-        Debug.Log(card);
         Board.PlayCard(card);
         RefreshBoard();
         yield return null;
@@ -253,7 +254,6 @@ public class GameManager : MonoBehaviour
     IEnumerator BuyCard(GameObject CardObject)
     {
         var card = CardObject.GetComponent<CardScript>().GetCard();
-        Debug.Log(card);
         Board.BuyCard(card);
         RefreshBoard();
         yield return null;
@@ -262,7 +262,6 @@ public class GameManager : MonoBehaviour
     IEnumerator PatronActivation(GameObject PatronObject)
     {
         var patronID = PatronObject.GetComponent<PatronScript>().patronID;
-        Debug.Log(patronID);
         Board.PatronActivation(patronID);
         RefreshBoard();
         yield return null;
@@ -272,8 +271,6 @@ public class GameManager : MonoBehaviour
     {
         var agent = AgentObject.GetComponent<AgentScript>().GetAgent();
         var owner = AgentObject.GetComponent<AgentScript>().GetOwner();
-        Debug.Log(agent.ToString());
-        Debug.Log(owner);
         if (owner == Board.CurrentPlayerId)
         {
             Board.ActivateAgent(agent.RepresentingCard);
@@ -305,7 +302,6 @@ public class GameManager : MonoBehaviour
 
     IEnumerator HandleSingleChoice(BaseChoice choice)
     {
-        Debug.Log(choice);
         isUIActive = true;
         if (choice is Choice<Card> cardChoice)
         {
@@ -321,7 +317,6 @@ public class GameManager : MonoBehaviour
             yield return new WaitUntil(() => EffectChoiceUI.GetComponent<EffectUIScript>().GetCompletedStatus());
             EffectChoiceUI.SetActive(false);
         }
-        Debug.Log("Choice finished");
         isUIActive = false;
         yield return null;
     }
@@ -329,8 +324,8 @@ public class GameManager : MonoBehaviour
 
     public IEnumerator PlayBotMove()
     {
-        var move = UnityRandomBot.Instance.Play(Board.GetSerializer(), Board.GetListOfPossibleMoves());
-        MoveText.GetComponent<TextMeshProUGUI>().text = move.ToString();
+        var move = TalesOfTributeAI.Instance.Play(Board.GetSerializer(), Board.GetListOfPossibleMoves());
+        MoveText.GetComponent<TextMeshProUGUI>().text = TalesOfTributeAI.Instance.GetMoves().FindLast(s => !s.StartsWith("--"));
         yield return StartCoroutine(MoveBot(move));
     }
 
@@ -344,7 +339,6 @@ public class GameManager : MonoBehaviour
     {
         if (move.Command == CommandEnum.END_TURN)
         {
-            Debug.Log(move.ToString());
             EndTurn();
             return;
         }
@@ -381,12 +375,10 @@ public class GameManager : MonoBehaviour
         {
             if (move is MakeChoiceMove<Card> cardChoice)
             {
-                Debug.Log($"CHOICE: {string.Join(',', cardChoice.Choices.Select(c => c.Name))}");
                 Board.MakeChoice(cardChoice.Choices);
             }
             else if (move is MakeChoiceMove<Effect> effectChoice)
             {
-                Debug.Log($"CHOICE: {string.Join(',', effectChoice.Choices.Select(e => e.Type))}");
                 Board.MakeChoice(effectChoice.Choices);
             }
         }

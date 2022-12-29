@@ -7,7 +7,7 @@ public class MoveBotButton : MonoBehaviour
 
     public void Update()
     {
-        if (GameManager.Board.CurrentPlayerId != BoardManager.GetComponent<GameManager>().player)
+        if (GameManager.Board.CurrentPlayerId != PlayerScript.Instance.playerID)
             GetComponent<Button>().interactable = true;
         else
         {

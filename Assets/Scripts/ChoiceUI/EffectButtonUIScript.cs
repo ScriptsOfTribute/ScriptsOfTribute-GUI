@@ -11,7 +11,6 @@ public class EffectButtonUIScript : MonoBehaviour
 
     public void OnClick()
     {
-        Debug.Log(_effect);
         FindObjectOfType<EffectUIScript>().MakeChoice(_effect);
     }
     public void SetUpEffectInfo(Effect effect)
