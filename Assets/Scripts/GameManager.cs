@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
@@ -25,6 +26,7 @@ public class GameManager : MonoBehaviour
     public GameObject EffectChoiceUI;
     public GameObject EndGameUI;
     public GameObject MoveText;
+    public GameObject ErrorTextField;
 
     public static bool isUIActive = false;
     public static bool isBotPlaying = false;
@@ -83,12 +85,10 @@ public class GameManager : MonoBehaviour
         for(int i = 0; i < Patrons.transform.childCount; i++)
         {
             var patronObject = Patrons.transform.GetChild(i).GetChild(0).gameObject;
-            if (patronObject.transform.childCount > 1) // Only treasury has one bcs it has no arrow
+            var patronID = patronObject.transform.GetChild(0).gameObject.GetComponent<PatronScript>().patronID;
+            if (patronID != PatronId.TREASURY)
             {
-                patronObject.transform.GetChild(1).gameObject.GetComponent<SpriteRenderer>().color = patronCalls == 0 ? Color.gray : Color.white;
-
-                var patronID = patronObject.transform.GetChild(1).gameObject.GetComponent<PatronScript>().patronID;
-                var arrow = patronObject.transform.GetChild(0);
+                var arrow = patronObject.transform.GetChild(1);
                 var favor = board.PatronStates.GetFor(patronID);
                 if (favor == PlayerScript.Instance.playerID)
                         arrow.transform.rotation = Quaternion.Euler(0f, 0f, 270f);
@@ -97,10 +97,15 @@ public class GameManager : MonoBehaviour
                 else if (favor == TalesOfTributeAI.Instance.botID)
                     arrow.transform.rotation = Quaternion.Euler(0f, 0f, 90f);
             }
-            else if (patronObject.transform.childCount == 1)
+            if (patronCalls > 0 && Board.CanPatronBeActivated(patronID))
             {
-                patronObject.transform.GetChild(0).gameObject.GetComponent<SpriteRenderer>().color = patronCalls == 0 ? Color.gray : Color.white;
+                patronObject.transform.GetChild(0).gameObject.GetComponent<SpriteRenderer>().color = Color.white;
             }
+            else
+            {
+                patronObject.transform.GetChild(0).gameObject.GetComponent<SpriteRenderer>().color = Color.gray;
+            }
+            
         }
 
         RefreshAgents(board);
@@ -236,9 +241,15 @@ public class GameManager : MonoBehaviour
                 Destroy(Player2.transform.GetChild(0).GetChild(i).GetChild(0).gameObject);
         }
         List<Card> currentPlayerHand = board.CurrentPlayer.Hand;
+        currentPlayerHandSlots.position = new Vector3(
+            0.375f*(5 - currentPlayerHand.Count), 
+            currentPlayerHandSlots.position.y, 
+            currentPlayerHandSlots.position.z
+        );
         for (int i = 0; i < currentPlayerHand.Count; i++)
         {
             GameObject card = Instantiate(CardPrefab, currentPlayerHandSlots.GetChild(i));
+            card.transform.position += new Vector3(0, 0, currentPlayerHand.Count - i);
             card.GetComponent<CardScript>().SetUpCardInfo(currentPlayerHand[i]);
         }
     }
@@ -246,6 +257,7 @@ public class GameManager : MonoBehaviour
     IEnumerator PlayCard(GameObject CardObject)
     {
         var card = CardObject.GetComponent<CardScript>().GetCard();
+        MoveLogger.Instance.AddSimpleMove(Move.PlayCard(card));
         Board.PlayCard(card);
         RefreshBoard();
         yield return null;
@@ -254,7 +266,16 @@ public class GameManager : MonoBehaviour
     IEnumerator BuyCard(GameObject CardObject)
     {
         var card = CardObject.GetComponent<CardScript>().GetCard();
-        Board.BuyCard(card);
+        MoveLogger.Instance.AddSimpleMove(Move.BuyCard(card));
+        try
+        {
+            Board.BuyCard(card);
+        }
+        catch (Exception e)
+        {
+           StartCoroutine(Messages.ShowMessage(ErrorTextField, e.Message, 2));
+        }
+        
         RefreshBoard();
         yield return null;
     }
@@ -262,6 +283,7 @@ public class GameManager : MonoBehaviour
     IEnumerator PatronActivation(GameObject PatronObject)
     {
         var patronID = PatronObject.GetComponent<PatronScript>().patronID;
+        MoveLogger.Instance.AddSimpleMove(Move.CallPatron(patronID));
         Board.PatronActivation(patronID);
         RefreshBoard();
         yield return null;
@@ -273,11 +295,21 @@ public class GameManager : MonoBehaviour
         var owner = AgentObject.GetComponent<AgentScript>().GetOwner();
         if (owner == Board.CurrentPlayerId)
         {
-            Board.ActivateAgent(agent.RepresentingCard);
+            try
+            {
+                Board.ActivateAgent(agent.RepresentingCard);
+            }
+            catch (Exception e)
+            {
+                StartCoroutine(Messages.ShowMessage(ErrorTextField, e.Message, 2));
+            }
+            MoveLogger.Instance.AddSimpleMove(Move.ActivateAgent(agent.RepresentingCard));
         }
         else if (owner == Board.EnemyPlayerId)
         {
-            var result = Board.AttackAgent(AgentObject.GetComponent<AgentScript>().GetAgent().RepresentingCard);
+            var agentCard = AgentObject.GetComponent<AgentScript>().GetAgent().RepresentingCard;
+            var result = Board.AttackAgent(agentCard);
+            MoveLogger.Instance.AddSimpleMove(Move.ActivateAgent(agentCard));
             if (result is Failure fail)
             {
                 Debug.Log(fail.Reason);
@@ -288,10 +320,10 @@ public class GameManager : MonoBehaviour
 
     IEnumerator HandleChoice()
     {
-        BaseSerializedChoice? pendingChoice = Board.PendingChoice;
+        SerializedChoice? pendingChoice = Board.PendingChoice;
         while (pendingChoice != null)
         {
-            yield return StartCoroutine(HandleSingleChoice(pendingChoice.ToChoice()));
+            yield return StartCoroutine(HandleSingleChoice(pendingChoice));
             pendingChoice = Board.PendingChoice;
         }
 
@@ -300,20 +332,20 @@ public class GameManager : MonoBehaviour
         yield return null;
     }
 
-    IEnumerator HandleSingleChoice(BaseChoice choice)
+    IEnumerator HandleSingleChoice(SerializedChoice choice)
     {
         isUIActive = true;
-        if (choice is Choice<Card> cardChoice)
+        if (choice.Type == Choice.DataType.CARD)
         {
             CardChoiceUI.SetActive(true);
-            CardChoiceUI.GetComponent<CardChoiceUIScript>().SetUpChoices(cardChoice);
+            CardChoiceUI.GetComponent<CardChoiceUIScript>().SetUpChoices(choice);
             yield return new WaitUntil(() => CardChoiceUI.GetComponent<CardChoiceUIScript>().GetCompletedStatus());
             CardChoiceUI.SetActive(false);
         }
-        else if (choice is Choice<Effect> effectChoice)
+        else if (choice.Type == Choice.DataType.EFFECT)
         {
             EffectChoiceUI.SetActive(true);
-            EffectChoiceUI.GetComponent<EffectUIScript>().SetUpChoices(effectChoice);
+            EffectChoiceUI.GetComponent<EffectUIScript>().SetUpChoices(choice);
             yield return new WaitUntil(() => EffectChoiceUI.GetComponent<EffectUIScript>().GetCompletedStatus());
             EffectChoiceUI.SetActive(false);
         }
@@ -325,7 +357,10 @@ public class GameManager : MonoBehaviour
     public IEnumerator PlayBotMove()
     {
         var move = TalesOfTributeAI.Instance.Play(Board.GetSerializer(), Board.GetListOfPossibleMoves());
-        MoveText.GetComponent<TextMeshProUGUI>().text = TalesOfTributeAI.Instance.GetMoves().FindLast(s => !s.StartsWith("--"));
+        if (move.Command != CommandEnum.END_TURN)
+            MoveText.GetComponent<TextMeshProUGUI>().text = MovesHistoryUI.ParseMove(move);
+        else
+            MoveText.GetComponent<TextMeshProUGUI>().text = "End turn";
         yield return StartCoroutine(MoveBot(move));
     }
 
@@ -379,11 +414,13 @@ public class GameManager : MonoBehaviour
             }
             else if (move is MakeChoiceMove<Effect> effectChoice)
             {
-                Board.MakeChoice(effectChoice.Choices);
+                Board.MakeChoice(effectChoice.Choices.First());
             }
         }
 
         RefreshBoard();
     }
+
+    
 
 }

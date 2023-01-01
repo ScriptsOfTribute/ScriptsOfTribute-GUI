@@ -4,6 +4,7 @@ using TalesOfTribute;
 using UnityEngine;
 using TMPro;
 using TalesOfTribute.Serializers;
+using System.Linq;
 
 public class AgentScript : MonoBehaviour
 {
@@ -11,11 +12,10 @@ public class AgentScript : MonoBehaviour
     public TextMeshPro Cost;
     public TextMeshPro Name;
     public TextMeshPro Type;
-    public SpriteRenderer Deck;
     public TextMeshPro Effects;
     public TextMeshPro HP;
     public SpriteRenderer activate;
-    public Sprite[] decks;
+    public Sprite[] CardSprites;
 
     private PlayerEnum _owner;
 
@@ -23,10 +23,10 @@ public class AgentScript : MonoBehaviour
     {
         _agent = card;
         _owner = owner;
+        GetComponent<SpriteRenderer>().sprite = CardSprites.First(sprite => sprite.name == CardScript.ParseDeckAndType(card.RepresentingCard));
         Cost.SetText(card.RepresentingCard.Cost.ToString());
         Name.SetText(card.RepresentingCard.Name);
         Type.SetText(card.RepresentingCard.Type.ToString());
-        Deck.sprite = decks[(int)card.RepresentingCard.Deck];
         HP.SetText(card.CurrentHp.ToString());
 
         string effects = "";
@@ -55,6 +55,16 @@ public class AgentScript : MonoBehaviour
     public PlayerEnum GetOwner()
     {
         return _owner;
+    }
+
+    private void OnMouseEnter()
+    {
+        transform.localScale *= 1.5f;
+    }
+
+    private void OnMouseExit()
+    {
+        transform.localScale /= 1.5f;
     }
 
 }

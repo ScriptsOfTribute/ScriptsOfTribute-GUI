@@ -8,14 +8,14 @@ public class CardShowUIScript : MonoBehaviour
 {
     public Card[] cards;
 
-    public GameObject CardSlots;
+    public GameObject Container;
     public GameObject cardPrefab;
     void OnEnable()
     {
-        int limit = Mathf.Min(cards.Length, CardSlots.transform.childCount);
-        for (int i = 0; i < limit; i++)
+        GameManager.isUIActive = true;
+        for (int i = 0; i < cards.Length; i++)
         {
-            GameObject c = Instantiate(cardPrefab, CardSlots.transform.GetChild(i).transform);
+            GameObject c = Instantiate(cardPrefab, Container.transform);
             c.GetComponent<Button>().enabled = false;
             c.GetComponent<CardUIButtonScript>().SetUpCardInfo(cards[i]);
         }
@@ -23,13 +23,11 @@ public class CardShowUIScript : MonoBehaviour
 
     void OnDisable()
     {
-        int limit = Mathf.Min(cards.Length, CardSlots.transform.childCount);
-        for (int i = 0; i < limit; i++)
+        for (int i = 0; i < Container.transform.childCount; i++)
         {
-            Destroy(CardSlots.transform.GetChild(i).transform.GetChild(0).transform.gameObject);
+            Destroy(Container.transform.GetChild(i).gameObject);
         }
         cards = new Card[] { };
+        GameManager.isUIActive = false;
     }
-
-
 }

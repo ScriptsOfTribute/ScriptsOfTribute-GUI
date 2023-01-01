@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
+using TMPro;
 
 public class SideSelectionButtons : MonoBehaviour
 {
@@ -10,8 +11,10 @@ public class SideSelectionButtons : MonoBehaviour
     {
         PlayerScript.Instance.SetSide(TalesOfTribute.PlayerEnum.PLAYER1);
         TalesOfTributeAI.Instance.SetSide(TalesOfTribute.PlayerEnum.PLAYER2);
-        this.GetComponent<Image>().color = Color.magenta;
-        otherButton.GetComponent<Image>().color = Color.grey;
+        GetComponent<Image>().fillCenter = true;
+        transform.GetChild(0).GetComponent<TextMeshProUGUI>().color = Color.black;
+        otherButton.GetComponent<Image>().fillCenter = false;
+        otherButton.transform.GetChild(0).GetComponent<TextMeshProUGUI>().color = Color.white;
         MainMenuScript.SideSelected = true;
     }
 
@@ -19,8 +22,10 @@ public class SideSelectionButtons : MonoBehaviour
     {
         PlayerScript.Instance.SetSide(TalesOfTribute.PlayerEnum.PLAYER2);
         TalesOfTributeAI.Instance.SetSide(TalesOfTribute.PlayerEnum.PLAYER1);
-        this.GetComponent<Image>().color = Color.magenta;
-        otherButton.GetComponent<Image>().color = Color.grey;
+        GetComponent<Image>().fillCenter = true;
+        transform.GetChild(0).GetComponent<TextMeshProUGUI>().color = Color.black;
+        otherButton.GetComponent<Image>().fillCenter = false;
+        otherButton.transform.GetChild(0).GetComponent<TextMeshProUGUI>().color = Color.white;
         MainMenuScript.SideSelected = true;
     }
 }

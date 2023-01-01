@@ -7,6 +7,8 @@ public class PlayerScript : MonoBehaviour
 {
     public static PlayerScript Instance;
     public PlayerEnum playerID { get; private set; }
+
+
     private void Awake()
     {
         if (Instance != null && Instance != this)

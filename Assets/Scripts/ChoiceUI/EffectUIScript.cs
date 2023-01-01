@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using TalesOfTribute;
+using TalesOfTribute.Serializers;
 using UnityEngine;
 
 public class EffectUIScript : MonoBehaviour
@@ -11,7 +12,7 @@ public class EffectUIScript : MonoBehaviour
     public GameObject Right;
 
     public GameObject EffectCardPrefab;
-    public Choice<Effect> effectChoice;
+    public SerializedChoice effectChoice;
     private bool _completed;
     private PlayResult endResult;
 
@@ -26,15 +27,15 @@ public class EffectUIScript : MonoBehaviour
         return _completed;
     }
 
-    public void SetUpChoices(Choice<Effect> choice)
+    public void SetUpChoices(SerializedChoice choice)
     {
         effectChoice = choice;
         _completed = false;
         var e = Instantiate(EffectCardPrefab, Left.transform);
-        e.GetComponent<EffectButtonUIScript>().SetUpEffectInfo(choice.PossibleChoices[0]);
+        e.GetComponent<EffectButtonUIScript>().SetUpEffectInfo(choice.PossibleEffects[0]);
 
         e = Instantiate(EffectCardPrefab, Right.transform);
-        e.GetComponent<EffectButtonUIScript>().SetUpEffectInfo(choice.PossibleChoices[1]);
+        e.GetComponent<EffectButtonUIScript>().SetUpEffectInfo(choice.PossibleEffects[1]);
     }
 
     void CleanUpChoices()
@@ -47,7 +48,8 @@ public class EffectUIScript : MonoBehaviour
 
     public void MakeChoice(Effect effect)
     {
-        GameManager.Board.MakeChoice<Effect>(effect);
+        GameManager.Board.MakeChoice(effect);
+        MoveLogger.Instance.AddSimpleMove(Move.MakeChoice(new List<Effect> { effect }));
         CleanUpChoices();
         _completed = true;
     }
