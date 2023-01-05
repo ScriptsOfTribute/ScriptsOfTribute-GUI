@@ -5,24 +5,29 @@ using UnityEngine;
 using TMPro;
 using System.Diagnostics.Contracts;
 using System.Linq;
+using TalesOfTribute.Board.Cards;
 
 public class CardScript : MonoBehaviour
 {
-    private Card _card;
+    private UniqueCard _card;
     public TextMeshPro Cost;
     public TextMeshPro Name;
     public TextMeshPro Type;
     public TextMeshPro Effects;
+    public TextMeshPro HP;
     private float _slot;
     public Sprite[] CardSprites;
-    public void SetUpCardInfo(Card card)
+    public void SetUpCardInfo(UniqueCard card)
     {
         _card = card;
         GetComponent<SpriteRenderer>().sprite = CardSprites.First(sprite => sprite.name == ParseDeckAndType(card));
         Cost.SetText(card.Cost.ToString());
         Name.SetText(card.Name);
         Type.SetText(TypeToString(card.Type));
-
+        if(card.HP > 0)
+        {
+            HP.SetText(card.HP.ToString());
+        }
         string effects = "";
 
         for(int i = 0; i < card.Effects.Length; i++)
@@ -55,7 +60,7 @@ public class CardScript : MonoBehaviour
         }
     }
 
-    public Card GetCard()
+    public UniqueCard GetCard()
     {
         return _card;
     }
@@ -91,7 +96,7 @@ public class CardScript : MonoBehaviour
         transform.position = new Vector3(transform.position.x, transform.position.y, _slot);
     }
 
-    public static string ParseDeckAndType(Card card)
+    public static string ParseDeckAndType(UniqueCard card)
     {
         string type = card.Type == CardType.AGENT || card.Type == CardType.CONTRACT_AGENT ? "Agent" : "Card";
         string deck = card.Deck switch

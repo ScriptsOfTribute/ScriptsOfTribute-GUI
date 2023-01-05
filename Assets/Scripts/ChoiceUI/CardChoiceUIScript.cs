@@ -4,7 +4,7 @@ using System.ComponentModel;
 using TalesOfTribute;
 using TalesOfTribute.Serializers;
 using TMPro;
-using Unity.VisualScripting;
+using TalesOfTribute.Board.Cards;
 using UnityEngine;
 
 public class CardChoiceUIScript : MonoBehaviour
@@ -14,7 +14,7 @@ public class CardChoiceUIScript : MonoBehaviour
     public GameObject ChoiceTopic;
 
     public SerializedChoice cardChoice;
-    private List<Card> choicesSelected;
+    private List<UniqueCard> choicesSelected;
 
     private bool _completed;
     private int maxSelects;
@@ -36,7 +36,7 @@ public class CardChoiceUIScript : MonoBehaviour
         }
         ChoiceTopic.GetComponent<TextMeshProUGUI>().SetText(text + $"- Min. {choice.MinChoices}, Max. {choice.MaxChoices}");
         _completed = false;
-        choicesSelected = new List<Card>();
+        choicesSelected = new List<UniqueCard>();
         cardChoice = choice;
         for(int i = 0; i < choice.PossibleCards.Count; i++)
         {
@@ -54,12 +54,12 @@ public class CardChoiceUIScript : MonoBehaviour
         }
     }
 
-    public void SelectCard(Card c)
+    public void SelectCard(UniqueCard c)
     {
         choicesSelected.Add(c);
     }
 
-    public void UnSelectCard(Card c)
+    public void UnSelectCard(UniqueCard c)
     {
         choicesSelected.Remove(c);
     }

@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using TalesOfTribute;
 using TalesOfTribute.Board;
+using TalesOfTribute.Board.Cards;
 using TalesOfTribute.Serializers;
 using TMPro;
 using UnityEngine;
@@ -205,7 +206,7 @@ public class GameManager : MonoBehaviour
     void SetUpTavern(SerializedBoard board)
     {
         CleanupTavern();
-        List<Card> cards = board.TavernAvailableCards;
+        List<UniqueCard> cards = board.TavernAvailableCards;
         for (int i = 0; i < Tavern.transform.childCount; i++)
         {
             GameObject card = Instantiate(CardPrefab, Tavern.transform.GetChild(i));
@@ -240,7 +241,7 @@ public class GameManager : MonoBehaviour
             if (Player2.transform.GetChild(0).GetChild(i).childCount > 0)
                 Destroy(Player2.transform.GetChild(0).GetChild(i).GetChild(0).gameObject);
         }
-        List<Card> currentPlayerHand = board.CurrentPlayer.Hand;
+        List<UniqueCard> currentPlayerHand = board.CurrentPlayer.Hand;
         currentPlayerHandSlots.position = new Vector3(
             0.375f*(5 - currentPlayerHand.Count), 
             currentPlayerHandSlots.position.y, 
@@ -310,10 +311,8 @@ public class GameManager : MonoBehaviour
             var agentCard = AgentObject.GetComponent<AgentScript>().GetAgent().RepresentingCard;
             var result = Board.AttackAgent(agentCard);
             MoveLogger.Instance.AddSimpleMove(Move.ActivateAgent(agentCard));
-            if (result is Failure fail)
-            {
-                Debug.Log(fail.Reason);
-            }
+            if (result != null)
+                EndGame(result);
         }
         yield return null;
     }
@@ -354,20 +353,25 @@ public class GameManager : MonoBehaviour
     }
 
 
-    public IEnumerator PlayBotMove()
+    public async void PlayBotMove()
     {
-        var move = TalesOfTributeAI.Instance.Play(Board.GetSerializer(), Board.GetListOfPossibleMoves());
+        var move = await TalesOfTributeAI.Instance.Play(Board.GetSerializer(), Board.GetListOfPossibleMoves());
+        if (move == null)
+        {
+            EndGame(new EndGameState(PlayerScript.Instance.playerID, GameEndReason.MOVE_TIMEOUT, "Bot didn't move in time!"));
+            return;
+        }
         if (move.Command != CommandEnum.END_TURN)
             MoveText.GetComponent<TextMeshProUGUI>().text = MovesHistoryUI.ParseMove(move);
         else
             MoveText.GetComponent<TextMeshProUGUI>().text = "End turn";
-        yield return StartCoroutine(MoveBot(move));
+        
+        MoveBot(move);
     }
 
-    IEnumerator MoveBot(Move move)
+    void MoveBot(Move move)
     {
         ParseMove(move);
-        yield return null;
     }
 
     void ParseMove(Move move)
@@ -380,44 +384,53 @@ public class GameManager : MonoBehaviour
         else if (move.Command == CommandEnum.PLAY_CARD)
         {
             var m = move as SimpleCardMove;
-            Board.PlayCard(m.Card);
+            var result = Board.PlayCard(m.Card);
+            if (result != null)
+                EndGame(result);
         }
         else if (move.Command == CommandEnum.ATTACK)
         {
             var m = move as SimpleCardMove;
             var result = Board.AttackAgent(m.Card);
-            if (result is Failure f)
-            {
-                EndGame(new EndGameState(Board.EnemyPlayerId, GameEndReason.INCORRECT_MOVE, f.Reason));
-            }
+            if (result != null)
+                EndGame(result);
         }
         else if (move.Command == CommandEnum.BUY_CARD)
         {
             var m = move as SimpleCardMove;
-            Board.BuyCard(m.Card);
+            var result = Board.BuyCard(m.Card);
+            if (result != null)
+                EndGame(result);
         }
         else if (move.Command == CommandEnum.ACTIVATE_AGENT)
         {
             var m = move as SimpleCardMove;
-            Board.ActivateAgent(m.Card);
+            var result = Board.ActivateAgent(m.Card);
+            if (result != null)
+                EndGame(result);
         }
         else if (move.Command == CommandEnum.CALL_PATRON)
         {
             var m = move as SimplePatronMove;
-            Board.PatronActivation(m.PatronId);
+            var result = Board.PatronActivation(m.PatronId);
+            if (result != null)
+                EndGame(result);
         }
         else if (move.Command == CommandEnum.MAKE_CHOICE)
         {
-            if (move is MakeChoiceMove<Card> cardChoice)
+            if (move is MakeChoiceMove<UniqueCard> cardChoice)
             {
-                Board.MakeChoice(cardChoice.Choices);
+                var result = Board.MakeChoice(cardChoice.Choices);
+                if (result != null)
+                    EndGame(result);
             }
-            else if (move is MakeChoiceMove<Effect> effectChoice)
+            else if (move is MakeChoiceMove<UniqueEffect> effectChoice)
             {
-                Board.MakeChoice(effectChoice.Choices.First());
+                var result = Board.MakeChoice(effectChoice.Choices.First());
+                if (result != null)
+                    EndGame(result);
             }
         }
-
         RefreshBoard();
     }
 

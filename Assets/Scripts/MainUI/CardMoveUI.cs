@@ -2,12 +2,13 @@ using UnityEngine;
 using TalesOfTribute;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
+using TalesOfTribute.Board.Cards;
 
 public class CardMoveUI : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler
 {
-    public Card SingleCard { get; set; }
-    public Card TargetCard { get; set; }
-    public Card SourceCard { get; set; }
+    public UniqueCard SingleCard { get; set; }
+    public UniqueCard TargetCard { get; set; }
+    public UniqueCard SourceCard { get; set; }
     public GameObject CardPrefab;
     public GameObject CardHolder;
     public GameObject TargetCardHolder;

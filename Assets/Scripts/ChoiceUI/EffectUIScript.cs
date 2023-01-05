@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using TalesOfTribute;
+using TalesOfTribute.Board.Cards;
 using TalesOfTribute.Serializers;
 using UnityEngine;
 
@@ -46,10 +47,10 @@ public class EffectUIScript : MonoBehaviour
             Destroy(Right.transform.GetChild(0).gameObject);
     }
 
-    public void MakeChoice(Effect effect)
+    public void MakeChoice(UniqueEffect effect)
     {
         GameManager.Board.MakeChoice(effect);
-        MoveLogger.Instance.AddSimpleMove(Move.MakeChoice(new List<Effect> { effect }));
+        MoveLogger.Instance.AddSimpleMove(Move.MakeChoice(new List<UniqueEffect> { effect }));
         CleanUpChoices();
         _completed = true;
     }

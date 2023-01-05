@@ -7,7 +7,7 @@ public class MoveBotButton : MonoBehaviour
 
     public void Update()
     {
-        if (GameManager.Board.CurrentPlayerId != PlayerScript.Instance.playerID)
+        if (GameManager.Board.CurrentPlayerId != PlayerScript.Instance.playerID && !TalesOfTributeAI.Instance.isMoving)
             GetComponent<Button>().interactable = true;
         else
         {
@@ -16,6 +16,6 @@ public class MoveBotButton : MonoBehaviour
     }
     public void OnButtonClick()
     {
-        StartCoroutine(BoardManager.GetComponent<GameManager>().PlayBotMove());
+        BoardManager.GetComponent<GameManager>().PlayBotMove();
     }
 }

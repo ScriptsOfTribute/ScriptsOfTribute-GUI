@@ -3,10 +3,11 @@ using System.Collections.Generic;
 using UnityEngine;
 using TalesOfTribute;
 using UnityEngine.UI;
+using TalesOfTribute.Board.Cards;
 
 public class CardShowUIScript : MonoBehaviour
 {
-    public Card[] cards;
+    public UniqueCard[] cards;
 
     public GameObject Container;
     public GameObject cardPrefab;
@@ -27,7 +28,7 @@ public class CardShowUIScript : MonoBehaviour
         {
             Destroy(Container.transform.GetChild(i).gameObject);
         }
-        cards = new Card[] { };
+        cards = new UniqueCard[] { };
         GameManager.isUIActive = false;
     }
 }

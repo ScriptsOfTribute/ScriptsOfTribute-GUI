@@ -7,10 +7,11 @@ using TMPro;
 using System.Linq;
 using UnityEngine.EventSystems;
 using Unity.VisualScripting;
+using TalesOfTribute.Board.Cards;
 
 public class CardUIButtonScript : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler
 {
-    private Card _card;
+    private UniqueCard _card;
     public GameObject Cost;
     public GameObject Name;
     public GameObject Type;
@@ -27,7 +28,7 @@ public class CardUIButtonScript : MonoBehaviour, IPointerEnterHandler, IPointerE
             FindObjectOfType<CardChoiceUIScript>().UnSelectCard(_card);
     }
 
-    public void SetUpCardInfo(Card card)
+    public void SetUpCardInfo(UniqueCard card)
     {
         _card = card;
         GetComponent<Image>().sprite = CardSprites.First(sprite => sprite.name == CardScript.ParseDeckAndType(_card));
@@ -64,7 +65,7 @@ public class CardUIButtonScript : MonoBehaviour, IPointerEnterHandler, IPointerE
         }
     }
 
-    public Card GetCard()
+    public UniqueCard GetCard()
     {
         return _card;
     }

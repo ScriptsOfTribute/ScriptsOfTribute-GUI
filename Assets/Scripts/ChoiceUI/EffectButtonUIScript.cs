@@ -5,17 +5,18 @@ using TalesOfTribute;
 using TMPro;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
+using TalesOfTribute.Board.Cards;
 
 public class EffectButtonUIScript : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler
 {
-    private Effect _effect;
+    private UniqueEffect _effect;
     public GameObject description;
 
     public void OnClick()
     {
         FindObjectOfType<EffectUIScript>().MakeChoice(_effect);
     }
-    public void SetUpEffectInfo(Effect effect)
+    public void SetUpEffectInfo(UniqueEffect effect)
     {
         _effect = effect;
 

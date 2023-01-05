@@ -8,6 +8,7 @@ using UnityEngine.EventSystems;
 using TalesOfTribute.Board;
 using System.Text;
 using System;
+using TalesOfTribute.Board.Cards;
 
 public class MovesHistoryUI : MonoBehaviour
 {
@@ -16,7 +17,6 @@ public class MovesHistoryUI : MonoBehaviour
     public GameObject SourceCardHolder;
     public GameObject TargetCardHolder;
     public GameObject MoveObject;
-    public GameObject ButtonText;
     public TMP_FontAsset FontAsset;
     private float _startY = -40f;
     private float _offset = 60f;
@@ -27,33 +27,8 @@ public class MovesHistoryUI : MonoBehaviour
     private void OnEnable()
     {
         lever = true;
-        SetSimpleMoves();
+        ShowAdvancedMoves();
     }
-    
-    void SetSimpleMoves()
-    {
-        CleanView();
-        List<Move> movesList = MoveLogger.Instance.GetSimpleMoves();
-        float currentOffset = 0f;
-        foreach (Move move in movesList)
-        {
-            var stringMove = ParseMove(move);
-            var moveObject = Instantiate(MoveObject, Container.transform);
-            moveObject.GetComponent<CardMoveUI>().CardHolder = CardHolder;
-            moveObject.AddComponent<TextMeshProUGUI>();
-            moveObject.GetComponent<TextMeshProUGUI>().SetText(stringMove);
-            moveObject.GetComponent<TextMeshProUGUI>().fontSize = 20f;
-            moveObject.GetComponent<RectTransform>().sizeDelta = new Vector2((float)stringMove.Length * 15f, _height);
-            moveObject.GetComponent<RectTransform>().anchoredPosition = new Vector2(0, _startY - currentOffset);
-            if (move is SimpleCardMove cardMove)
-            {
-                moveObject.GetComponent<CardMoveUI>().SingleCard = cardMove.Card;
-            }
-            currentOffset += _offset;
-        }
-        ButtonText.GetComponent<TextMeshProUGUI>().SetText("Advanced moves");
-    }
-
     private void OnDisable()
     {
         CleanView();
@@ -71,11 +46,11 @@ public class MovesHistoryUI : MonoBehaviour
     {
         if (move.Command == CommandEnum.MAKE_CHOICE)
         {
-            if (move is MakeChoiceMove<Card> cardChoice)
+            if (move is MakeChoiceMove<UniqueCard> cardChoice)
             {
                 return $"\tChoice: {string.Join(',', cardChoice.Choices.Select(c => c.Name))}";
             }
-            else if (move is MakeChoiceMove<Effect> effectChoice)
+            else if (move is MakeChoiceMove<UniqueEffect> effectChoice)
             {
                 return $"\tChoice: {string.Join(',', effectChoice.Choices.Select(e => e.Type))}";
             }
@@ -101,21 +76,6 @@ public class MovesHistoryUI : MonoBehaviour
         }
 
         return move.ToString();
-    }
-
-    
-    public void AdvancedMovesOnClick()
-    {
-        if (lever)
-        {
-            ShowAdvancedMoves();
-            lever = false;
-        }
-        else
-        {
-            SetSimpleMoves();
-            lever = true;
-        }
     }
 
     public void ShowAdvancedMoves()
@@ -151,7 +111,6 @@ public class MovesHistoryUI : MonoBehaviour
             }
             currentOffset += _offset;
         }
-        ButtonText.GetComponent<TextMeshProUGUI>().SetText("Simple moves");
     }
 
     private string ParseCompletedAction(CompletedAction action)

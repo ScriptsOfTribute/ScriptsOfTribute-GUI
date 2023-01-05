@@ -8,6 +8,10 @@ public class EndTurnButton : MonoBehaviour
     public void OnClickEndTurn()
     {
         if (!GameManager.isBotPlaying)
+        {
             FindObjectOfType<GameManager>().GetComponent<GameManager>().EndTurn();
+            MoveLogger.Instance.AddSimpleMove(Move.EndTurn());
+        }
+            
     }
 }
