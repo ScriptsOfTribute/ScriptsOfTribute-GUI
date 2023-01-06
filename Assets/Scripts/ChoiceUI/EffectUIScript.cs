@@ -50,7 +50,6 @@ public class EffectUIScript : MonoBehaviour
     public void MakeChoice(UniqueEffect effect)
     {
         GameManager.Board.MakeChoice(effect);
-        MoveLogger.Instance.AddSimpleMove(Move.MakeChoice(new List<UniqueEffect> { effect }));
         CleanUpChoices();
         _completed = true;
     }

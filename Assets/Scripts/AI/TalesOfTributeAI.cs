@@ -49,7 +49,6 @@ public class TalesOfTributeAI : MonoBehaviour
         if (await Task.WhenAny(task, Task.Delay(_timeout)) == task)
         {
             var move = task.Result;
-            MoveLogger.Instance.AddSimpleMove(move);
             isMoving = false;
             return move;
         }

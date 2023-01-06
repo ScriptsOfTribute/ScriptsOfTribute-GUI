@@ -17,15 +17,23 @@ public class CardUIButtonScript : MonoBehaviour, IPointerEnterHandler, IPointerE
     public GameObject Type;
     public GameObject Effects;
     public GameObject checkmark;
+    public GameObject HP;
     public Sprite[] CardSprites;
 
     public void OnClick()
     {
-        checkmark.SetActive(!checkmark.activeSelf);
-        if (checkmark.activeSelf)
-            FindObjectOfType<CardChoiceUIScript>().SelectCard(_card);
+        
+        if (!checkmark.activeSelf)
+        {
+            bool canMark = FindObjectOfType<CardChoiceUIScript>().SelectCard(_card);
+            checkmark.SetActive(canMark);
+        }
         else
+        {
             FindObjectOfType<CardChoiceUIScript>().UnSelectCard(_card);
+            checkmark.SetActive(false);
+        }
+            
     }
 
     public void SetUpCardInfo(UniqueCard card)
@@ -35,6 +43,10 @@ public class CardUIButtonScript : MonoBehaviour, IPointerEnterHandler, IPointerE
         Cost.GetComponent<TextMeshProUGUI>().SetText(card.Cost.ToString());
         Name.GetComponent<TextMeshProUGUI>().SetText(card.Name);
         Type.GetComponent<TextMeshProUGUI>().SetText(TypeToString(card.Type));
+        if (card.HP > 0)
+        {
+            HP.GetComponent<TextMeshProUGUI>().SetText(card.HP.ToString());
+        }
 
         string effects = "";
 

@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 public class MiscButtonHandler : MonoBehaviour
 {
@@ -9,6 +10,11 @@ public class MiscButtonHandler : MonoBehaviour
     public void CloseApp()
     {
         Application.Quit();
+    }
+
+    public void RefreshScene()
+    {
+        SceneManager.LoadScene(SceneManager.GetActiveScene().name, LoadSceneMode.Single);
     }
 
     public void ChangeResolution1280x720()

@@ -82,7 +82,7 @@ public class MovesHistoryUI : MonoBehaviour
     {
         CleanView();
 
-        List<CompletedAction> movesList = MoveLogger.Instance.GetAdvancedMoves();
+        List<CompletedAction> movesList = Logger.Instance.GetAdvancedMoves();
         float currentOffset = 0f;
         foreach (CompletedAction move in movesList)
         {

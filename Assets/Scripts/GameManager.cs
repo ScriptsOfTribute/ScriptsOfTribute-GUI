@@ -31,12 +31,10 @@ public class GameManager : MonoBehaviour
 
     public static bool isUIActive = false;
     public static bool isBotPlaying = false;
-
     void Start()
     {
         PatronId[] patrons = PatronSelectionScript.selectedPatrons.ToArray();
         Board = new TalesOfTributeApi(patrons);
-
         for (int i = 0; i < Patrons.transform.childCount; i++)
         {
             var slot = Patrons.transform.GetChild(i);
@@ -108,6 +106,7 @@ public class GameManager : MonoBehaviour
             }
             
         }
+
 
         RefreshAgents(board);
         RefreshScores(board);
@@ -258,7 +257,6 @@ public class GameManager : MonoBehaviour
     IEnumerator PlayCard(GameObject CardObject)
     {
         var card = CardObject.GetComponent<CardScript>().GetCard();
-        MoveLogger.Instance.AddSimpleMove(Move.PlayCard(card));
         Board.PlayCard(card);
         RefreshBoard();
         yield return null;
@@ -267,7 +265,6 @@ public class GameManager : MonoBehaviour
     IEnumerator BuyCard(GameObject CardObject)
     {
         var card = CardObject.GetComponent<CardScript>().GetCard();
-        MoveLogger.Instance.AddSimpleMove(Move.BuyCard(card));
         try
         {
             Board.BuyCard(card);
@@ -284,7 +281,6 @@ public class GameManager : MonoBehaviour
     IEnumerator PatronActivation(GameObject PatronObject)
     {
         var patronID = PatronObject.GetComponent<PatronScript>().patronID;
-        MoveLogger.Instance.AddSimpleMove(Move.CallPatron(patronID));
         Board.PatronActivation(patronID);
         RefreshBoard();
         yield return null;
@@ -304,13 +300,11 @@ public class GameManager : MonoBehaviour
             {
                 StartCoroutine(Messages.ShowMessage(ErrorTextField, e.Message, 2));
             }
-            MoveLogger.Instance.AddSimpleMove(Move.ActivateAgent(agent.RepresentingCard));
         }
         else if (owner == Board.EnemyPlayerId)
         {
             var agentCard = AgentObject.GetComponent<AgentScript>().GetAgent().RepresentingCard;
             var result = Board.AttackAgent(agentCard);
-            MoveLogger.Instance.AddSimpleMove(Move.ActivateAgent(agentCard));
             if (result != null)
                 EndGame(result);
         }

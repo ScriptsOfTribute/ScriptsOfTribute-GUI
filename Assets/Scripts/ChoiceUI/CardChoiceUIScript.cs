@@ -17,7 +17,6 @@ public class CardChoiceUIScript : MonoBehaviour
     private List<UniqueCard> choicesSelected;
 
     private bool _completed;
-    private int maxSelects;
 
     private void Start()
     {
@@ -54,9 +53,12 @@ public class CardChoiceUIScript : MonoBehaviour
         }
     }
 
-    public void SelectCard(UniqueCard c)
+    public bool SelectCard(UniqueCard c)
     {
+        if (choicesSelected.Count >= cardChoice.MaxChoices)
+            return false;
         choicesSelected.Add(c);
+        return true;
     }
 
     public void UnSelectCard(UniqueCard c)
@@ -67,9 +69,13 @@ public class CardChoiceUIScript : MonoBehaviour
     public void MakeChoice()
     {
         GameManager.Board.MakeChoice(choicesSelected);
-        MoveLogger.Instance.AddSimpleMove(Move.MakeChoice(choicesSelected));
         CleanUpChoices();
         _completed = true;
+    }
+
+    public bool EnoughChoices()
+    {
+        return cardChoice.MinChoices <= choicesSelected.Count;
     }
 
     public bool GetCompletedStatus()

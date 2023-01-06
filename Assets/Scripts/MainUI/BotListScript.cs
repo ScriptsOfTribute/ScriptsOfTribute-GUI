@@ -16,21 +16,6 @@ public class BotListScript : MonoBehaviour
 
     void Start()
     {
-        Assembly[] assemblies = AppDomain.CurrentDomain.GetAssemblies();
-        foreach(var a in assemblies)
-        {
-            foreach(var t in a.GetTypes())
-            {
-                if(t.IsSubclassOf(typeof(AI)))
-                {
-                    var b = Instantiate(ButtonPrefab, Container.transform);
-                    b.transform.GetChild(0).GetComponent<TextMeshProUGUI>().SetText(t.Name);
-                    b.GetComponent<PickBotButtonScript>().Assembly = a;
-                    b.GetComponent<PickBotButtonScript>().Type = t;
-                }
-            }
-        }
-
         string[] dlls = Directory.GetFiles(Application.streamingAssetsPath, "*.dll");
 
         foreach(var dll in dlls)
