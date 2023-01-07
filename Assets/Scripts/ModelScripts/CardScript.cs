@@ -15,9 +15,9 @@ public class CardScript : MonoBehaviour
     public TextMeshPro Type;
     public TextMeshPro Effects;
     public TextMeshPro HP;
-    private float _slot;
     public Sprite[] CardSprites;
-    public void SetUpCardInfo(UniqueCard card)
+    private bool _tavernCardPlayerCanAfford;
+    public void SetUpCardInfo(UniqueCard card, bool _canAfford = true)
     {
         _card = card;
         GetComponent<SpriteRenderer>().sprite = CardSprites.First(sprite => sprite.name == ParseDeckAndType(card));
@@ -58,6 +58,14 @@ public class CardScript : MonoBehaviour
         {
             Effects.fontSize = 0.75f;
         }
+
+        _tavernCardPlayerCanAfford = _canAfford;
+        if (!_canAfford)
+        {
+            var color = GetComponent<SpriteRenderer>().color;
+            color.a = 200 / 255f;
+            GetComponent<SpriteRenderer>().color = color;
+        }
     }
 
     public UniqueCard GetCard()
@@ -79,21 +87,9 @@ public class CardScript : MonoBehaviour
         };
     }
 
-    private void OnMouseEnter()
+    public bool CanPlayerAfford()
     {
-        if (GameManager.isUIActive)
-            return;
-        transform.localScale *= 1.5f;
-        _slot = transform.position.z;
-        transform.position = new Vector3(transform.position.x, transform.position.y, 0);
-    }
-
-    private void OnMouseExit()
-    {
-        if (GameManager.isUIActive)
-            return;
-        transform.localScale /= 1.5f;
-        transform.position = new Vector3(transform.position.x, transform.position.y, _slot);
+        return _tavernCardPlayerCanAfford;
     }
 
     public static string ParseDeckAndType(UniqueCard card)

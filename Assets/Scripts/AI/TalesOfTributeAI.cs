@@ -11,6 +11,8 @@ public class TalesOfTributeAI : MonoBehaviour
     public static TalesOfTributeAI Instance { get; private set; }
     public PlayerEnum botID { get; private set; }
     private AI bot { get; set; }
+
+    public string Name { get; set; }
     public bool isMoving { get; private set; }
     private int _timeout = 1000; //ms, default value
 

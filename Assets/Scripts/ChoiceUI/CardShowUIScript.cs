@@ -4,6 +4,7 @@ using UnityEngine;
 using TalesOfTribute;
 using UnityEngine.UI;
 using TalesOfTribute.Board.Cards;
+using TMPro;
 
 public class CardShowUIScript : MonoBehaviour
 {
@@ -11,6 +12,7 @@ public class CardShowUIScript : MonoBehaviour
 
     public GameObject Container;
     public GameObject cardPrefab;
+    public TextMeshProUGUI title;
     void OnEnable()
     {
         GameManager.isUIActive = true;

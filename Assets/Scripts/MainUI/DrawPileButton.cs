@@ -16,6 +16,7 @@ public class DrawPileButton : MonoBehaviour
             CardShowUI.GetComponent<CardShowUIScript>().cards = serializer.CurrentPlayer.DrawPile.ToArray();
         else
             CardShowUI.GetComponent<CardShowUIScript>().cards = serializer.EnemyPlayer.DrawPile.ToArray();
+        CardShowUI.GetComponent<CardShowUIScript>().title.SetText("Draw Pile");
         CardShowUI.SetActive(true);
     }
 }

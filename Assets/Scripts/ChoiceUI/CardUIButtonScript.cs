@@ -98,11 +98,11 @@ public class CardUIButtonScript : MonoBehaviour, IPointerEnterHandler, IPointerE
 
     public void OnPointerEnter(PointerEventData pointerEventData)
     {
-        transform.localScale *= 1.5f;
+        transform.localScale *= 2f;
     }
 
     public void OnPointerExit(PointerEventData pointerEventData)
     {
-        transform.localScale /= 1.5f;
+        transform.localScale /= 2f;
     }
 }

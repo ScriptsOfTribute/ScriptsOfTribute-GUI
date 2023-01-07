@@ -14,8 +14,13 @@ public class MoveBotButton : MonoBehaviour
             GetComponent<Button>().interactable = false;
         }
     }
-    public void OnButtonClick()
+    public void PlayMove()
     {
         BoardManager.GetComponent<GameManager>().PlayBotMove();
+    }
+
+    public void PlayAllMoves()
+    {
+        BoardManager.GetComponent<GameManager>().PlayBotAllTurnMoves();
     }
 }

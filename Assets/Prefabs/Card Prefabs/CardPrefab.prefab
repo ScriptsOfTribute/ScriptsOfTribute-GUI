@@ -529,6 +529,7 @@ GameObject:
   - component: {fileID: 2183425910007522988}
   - component: {fileID: 7729201846910854144}
   - component: {fileID: 3610821604146459509}
+  - component: {fileID: -14568575409116614}
   m_Layer: 0
   m_Name: CardPrefab
   m_TagString: Card
@@ -692,6 +693,19 @@ PolygonCollider2D:
       - {x: 0.099999994, y: -1.9699999}
       - {x: 1.06, y: -1}
       - {x: 1.06, y: 1.02}
+--- !u!114 &-14568575409116614
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4871502333884723903}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3dd3cd36b728a574892d3cfc2e3fda3e, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  ZoomValue: 2
 --- !u!1 &6800064358952710927
 GameObject:
   m_ObjectHideFlags: 0

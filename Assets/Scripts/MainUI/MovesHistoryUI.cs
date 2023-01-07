@@ -94,6 +94,7 @@ public class MovesHistoryUI : MonoBehaviour
             moveObject.AddComponent<TextMeshProUGUI>();
             moveObject.GetComponent<TextMeshProUGUI>().SetText(stringMove);
             moveObject.GetComponent<TextMeshProUGUI>().fontSize = 20f;
+            moveObject.GetComponent<TextMeshProUGUI>().font = FontAsset;
             moveObject.GetComponent<RectTransform>().sizeDelta = new Vector2((float)stringMove.Length * 15f, _height);
             moveObject.GetComponent<RectTransform>().anchoredPosition = new Vector2(0, _startY - currentOffset);
             if (move.SourceCard != null && move.TargetCard != null)

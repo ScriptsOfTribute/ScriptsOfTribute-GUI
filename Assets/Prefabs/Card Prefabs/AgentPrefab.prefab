@@ -357,6 +357,7 @@ GameObject:
   - component: {fileID: 2183425910007522988}
   - component: {fileID: 29544462216402985}
   - component: {fileID: 2563198151386527206}
+  - component: {fileID: -5998361145135132530}
   m_Layer: 0
   m_Name: AgentPrefab
   m_TagString: Agent
@@ -513,6 +514,19 @@ MonoBehaviour:
   - {fileID: 21300000, guid: 8fec64805fdd333448db04217deb7cea, type: 3}
   - {fileID: 21300000, guid: 9df2e0d6da60e4f49b81d89b9ad48ffc, type: 3}
   - {fileID: 21300000, guid: 6e4d40aa0e6f2b84fbd744903e301c9f, type: 3}
+--- !u!114 &-5998361145135132530
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4871502333884723903}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3dd3cd36b728a574892d3cfc2e3fda3e, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  ZoomValue: 2
 --- !u!1 &5192952849533613670
 GameObject:
   m_ObjectHideFlags: 0

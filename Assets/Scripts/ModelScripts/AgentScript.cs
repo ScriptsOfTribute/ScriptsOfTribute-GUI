@@ -57,14 +57,4 @@ public class AgentScript : MonoBehaviour
         return _owner;
     }
 
-    private void OnMouseEnter()
-    {
-        transform.localScale *= 1.5f;
-    }
-
-    private void OnMouseExit()
-    {
-        transform.localScale /= 1.5f;
-    }
-
 }

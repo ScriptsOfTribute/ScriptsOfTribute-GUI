@@ -8,6 +8,9 @@ using TalesOfTribute.Board.Cards;
 using TalesOfTribute.Serializers;
 using TMPro;
 using UnityEngine;
+using UnityEngine.UI;
+using UnityEngine.UIElements;
+
 public class GameManager : MonoBehaviour
 {
     public static TalesOfTributeApi Board;
@@ -20,19 +23,21 @@ public class GameManager : MonoBehaviour
     public GameObject AgentPrefab;
     public GameObject[] PatronsPrefabs;
 
-    public GameObject Player1Score;
-    public GameObject Player2Score;
+    public TextMeshProUGUI[] PlayerScore;
+    public TextMeshProUGUI[] BotScore;
 
     public GameObject CardChoiceUI;
     public GameObject EffectChoiceUI;
     public GameObject EndGameUI;
     public GameObject MoveText;
     public GameObject ErrorTextField;
+    public GameObject BotName;
 
     public static bool isUIActive = false;
     public static bool isBotPlaying = false;
     void Start()
     {
+        BotName.GetComponent<TextMeshProUGUI>().SetText(TalesOfTributeAI.Instance.Name);
         PatronId[] patrons = PatronSelectionScript.selectedPatrons.ToArray();
         Board = new TalesOfTributeApi(patrons);
         for (int i = 0; i < Patrons.transform.childCount; i++)
@@ -90,11 +95,20 @@ public class GameManager : MonoBehaviour
                 var arrow = patronObject.transform.GetChild(1);
                 var favor = board.PatronStates.GetFor(patronID);
                 if (favor == PlayerScript.Instance.playerID)
-                        arrow.transform.rotation = Quaternion.Euler(0f, 0f, 270f);
-                else if (favor == PlayerEnum.NO_PLAYER_SELECTED)
-                        arrow.transform.rotation = Quaternion.Euler(0f, 0f, 180f);
-                else if (favor == TalesOfTributeAI.Instance.botID)
+                {
                     arrow.transform.rotation = Quaternion.Euler(0f, 0f, 90f);
+                    arrow.transform.localPosition = new Vector3(0, -0.72f, 0);
+                }
+                else if (favor == PlayerEnum.NO_PLAYER_SELECTED)
+                {
+                    arrow.transform.rotation = Quaternion.Euler(0f, 0f, 0f);
+                    arrow.transform.localPosition = new Vector3(-0.72f, 0, 0);
+                }
+                else if (favor == TalesOfTributeAI.Instance.botID)
+                {
+                    arrow.transform.rotation = Quaternion.Euler(0f, 0f, -90f);
+                    arrow.transform.localPosition = new Vector3(0, 0.72f, 0);
+                }
             }
             if (patronCalls > 0 && Board.CanPatronBeActivated(patronID))
             {
@@ -187,19 +201,15 @@ public class GameManager : MonoBehaviour
     {
         SerializedPlayer player = board.CurrentPlayer.PlayerID == PlayerScript.Instance.playerID ? board.CurrentPlayer : board.EnemyPlayer;
 
-        string text = $"Gold: {player.Coins}\n" +
-                    $"Prestige: {player.Prestige}\n" +
-                    $"Power: {player.Power}\n";
-
-        Player1Score.GetComponent<TextMeshProUGUI>().SetText(text);
+        PlayerScore[0].SetText(player.Coins.ToString());
+        PlayerScore[1].SetText(player.Prestige.ToString());
+        PlayerScore[2].SetText(player.Power.ToString());
 
         player = board.CurrentPlayer.PlayerID == TalesOfTributeAI.Instance.botID ? board.CurrentPlayer : board.EnemyPlayer;
 
-        text = $"Gold: {player.Coins}\n" +
-                $"Prestige: {player.Prestige}\n" +
-                $"Power: {player.Power}\n";
-
-        Player2Score.GetComponent<TextMeshProUGUI>().SetText(text);
+        BotScore[0].SetText(player.Coins.ToString());
+        BotScore[1].SetText(player.Prestige.ToString());
+        BotScore[2].SetText(player.Power.ToString());
     }
 
     void SetUpTavern(SerializedBoard board)
@@ -210,7 +220,7 @@ public class GameManager : MonoBehaviour
         {
             GameObject card = Instantiate(CardPrefab, Tavern.transform.GetChild(i));
             card.gameObject.tag = "TavernCard";
-            card.GetComponent<CardScript>().SetUpCardInfo(cards[i]);
+            card.GetComponent<CardScript>().SetUpCardInfo(cards[i], cards[i].Cost <= board.CurrentPlayer.Coins);
         }
     }
 
@@ -265,13 +275,14 @@ public class GameManager : MonoBehaviour
     IEnumerator BuyCard(GameObject CardObject)
     {
         var card = CardObject.GetComponent<CardScript>().GetCard();
-        try
+        bool canAfford = CardObject.GetComponent<CardScript>().CanPlayerAfford();
+        if (canAfford)
         {
             Board.BuyCard(card);
         }
-        catch (Exception e)
+        else
         {
-           StartCoroutine(Messages.ShowMessage(ErrorTextField, e.Message, 2));
+           StartCoroutine(Messages.ShowMessage(ErrorTextField, "You can't afford this card", 2));
         }
         
         RefreshBoard();
@@ -318,10 +329,9 @@ public class GameManager : MonoBehaviour
         {
             yield return StartCoroutine(HandleSingleChoice(pendingChoice));
             pendingChoice = Board.PendingChoice;
+            yield return null;
+            RefreshBoard();
         }
-
-        yield return null;
-        RefreshBoard();
         yield return null;
     }
 
@@ -361,6 +371,22 @@ public class GameManager : MonoBehaviour
             MoveText.GetComponent<TextMeshProUGUI>().text = "End turn";
         
         MoveBot(move);
+    }
+
+    public async void PlayBotAllTurnMoves()
+    {
+        Move move;
+        do
+        {
+            move = await TalesOfTributeAI.Instance.Play(Board.GetSerializer(), Board.GetListOfPossibleMoves());
+            if (move == null)
+            {
+                EndGame(new EndGameState(PlayerScript.Instance.playerID, GameEndReason.MOVE_TIMEOUT, "Bot didn't move in time!"));
+                return;
+            }
+            MoveBot(move);
+        } while (move.Command != CommandEnum.END_TURN);
+        
     }
 
     void MoveBot(Move move)

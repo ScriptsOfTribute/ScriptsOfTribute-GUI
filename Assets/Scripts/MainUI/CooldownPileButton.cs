@@ -16,6 +16,7 @@ public class CooldownPileButton : MonoBehaviour
             CardShowUI.GetComponent<CardShowUIScript>().cards = serializer.CurrentPlayer.CooldownPile.ToArray();
         else
             CardShowUI.GetComponent<CardShowUIScript>().cards = serializer.EnemyPlayer.CooldownPile.ToArray();
+        CardShowUI.GetComponent<CardShowUIScript>().title.SetText("Cooldown Pile");
         CardShowUI.SetActive(true);
     }
 }
