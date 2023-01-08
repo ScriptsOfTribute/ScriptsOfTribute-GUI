@@ -235,27 +235,29 @@ public class GameManager : MonoBehaviour
 
     void RefreshHand(SerializedBoard board)
     {
-        Transform currentPlayerHandSlots = board.CurrentPlayer.PlayerID == PlayerScript.Instance.playerID
-                                    ? Player1.transform.GetChild(0) //0th idx is Hand, 1st is Agents
-                                    : Player2.transform.GetChild(0);
+        var (currentPlayer, enemyPlayer) = board.CurrentPlayer.PlayerID == PlayerScript.Instance.playerID
+            ? (Player1, Player2)
+            : (Player2, Player1);
+        RefreshHandForPlayer(currentPlayer, board.CurrentPlayer, currentPlayer.transform.GetChild(0));
+        RefreshHandForPlayer(enemyPlayer, board.EnemyPlayer, enemyPlayer.transform.GetChild(0));
+    }
 
-        for (int i = 0; i < Player1.transform.GetChild(0).childCount; i++)
+    void RefreshHandForPlayer(GameObject playerObject, SerializedPlayer player, Transform currentPlayerHandSlots)
+    {
+        for (int i = 0; i < playerObject.transform.GetChild(0).childCount; i++)
         {
-            if (Player1.transform.GetChild(0).GetChild(i).childCount > 0)
-                Destroy(Player1.transform.GetChild(0).GetChild(i).GetChild(0).gameObject);
+            if (playerObject.transform.GetChild(0).GetChild(i).childCount > 0)
+                Destroy(playerObject.transform.GetChild(0).GetChild(i).GetChild(0).gameObject);
         }
 
-        for (int i = 0; i < Player2.transform.GetChild(0).childCount; i++)
-        {
-            if (Player2.transform.GetChild(0).GetChild(i).childCount > 0)
-                Destroy(Player2.transform.GetChild(0).GetChild(i).GetChild(0).gameObject);
-        }
-        List<UniqueCard> currentPlayerHand = board.CurrentPlayer.Hand;
-        currentPlayerHandSlots.position = new Vector3(
+        List<UniqueCard> currentPlayerHand = player.Hand;
+        var position = currentPlayerHandSlots.position;
+        position = new Vector3(
             0.375f*(5 - currentPlayerHand.Count), 
-            currentPlayerHandSlots.position.y, 
-            currentPlayerHandSlots.position.z
+            position.y, 
+            position.z
         );
+        currentPlayerHandSlots.position = position;
         for (int i = 0; i < currentPlayerHand.Count; i++)
         {
             GameObject card = Instantiate(CardPrefab, currentPlayerHandSlots.GetChild(i));
