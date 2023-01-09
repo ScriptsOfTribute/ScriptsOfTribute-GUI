@@ -39,9 +39,19 @@ public class TalesOfTributeAI : MonoBehaviour
         this.botID = id;
     }
 
-    public PatronId SelectPatron(List<PatronId> availablePatrons, int round)
+    public async Task<PatronId> SelectPatron(List<PatronId> availablePatrons, int round)
     {
-        return bot.SelectPatron(availablePatrons, round);
+        var task = Task.Run(() => bot.SelectPatron(availablePatrons, round));
+        if (await Task.WhenAny(task, Task.Delay(_timeout)) == task)
+        {
+            var move = task.Result;
+            isMoving = false;
+            return move;
+        }
+        else
+        {
+            return PatronId.TREASURY;
+        }
     }
 
     public async Task<Move> Play(SerializedBoard serializedBoard, List<Move> possibleMoves)

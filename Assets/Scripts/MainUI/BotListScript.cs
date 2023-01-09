@@ -13,6 +13,7 @@ public class BotListScript : MonoBehaviour
     public GameObject ButtonPrefab;
     public GameObject Container;
     public TMP_FontAsset font;
+    public TextMeshProUGUI Description;
 
     void Start()
     {
@@ -30,6 +31,7 @@ public class BotListScript : MonoBehaviour
                     b.transform.GetChild(0).GetComponent<TextMeshProUGUI>().font = font;
                     b.GetComponent<PickBotButtonScript>().Assembly = asm;
                     b.GetComponent<PickBotButtonScript>().Type = t;
+                    b.GetComponent<PickBotButtonScript>().Description = Description;
                 }
             }
         }

@@ -98,16 +98,19 @@ public class GameManager : MonoBehaviour
                 {
                     arrow.transform.rotation = Quaternion.Euler(0f, 0f, 90f);
                     arrow.transform.localPosition = new Vector3(0, -0.72f, 0);
+                    arrow.GetComponent<SpriteRenderer>().color = Color.green;
                 }
                 else if (favor == PlayerEnum.NO_PLAYER_SELECTED)
                 {
                     arrow.transform.rotation = Quaternion.Euler(0f, 0f, 0f);
                     arrow.transform.localPosition = new Vector3(-0.72f, 0, 0);
+                    arrow.GetComponent<SpriteRenderer>().color = Color.white;
                 }
                 else if (favor == TalesOfTributeAI.Instance.botID)
                 {
                     arrow.transform.rotation = Quaternion.Euler(0f, 0f, -90f);
                     arrow.transform.localPosition = new Vector3(0, 0.72f, 0);
+                    arrow.GetComponent<SpriteRenderer>().color = Color.red;
                 }
             }
             if (patronCalls > 0 && Board.CanPatronBeActivated(patronID))
@@ -121,6 +124,7 @@ public class GameManager : MonoBehaviour
             
         }
 
+        Logger.Instance.UpdateMoves(board.CompletedActions);
 
         RefreshAgents(board);
         RefreshScores(board);
@@ -144,7 +148,11 @@ public class GameManager : MonoBehaviour
 #nullable enable
         EndGameState? endGame = Board.CheckWinner();
         if (endGame != null)
+        {
             EndGame(endGame);
+            
+        }
+            
 #nullable disable
         RefreshBoard();
         StartTurn();
@@ -152,9 +160,9 @@ public class GameManager : MonoBehaviour
 
     void EndGame(EndGameState state)
     {
+        transform.parent.gameObject.SetActive(false);
         EndGameUI.SetActive(true);
-        EndGameUI.GetComponent<EndGameUI>().SetUp(state);
-        this.enabled = false;
+        EndGameUI.GetComponent<EndGameUI>().SetUp(state);        
     }
 
     void RefreshAgents(SerializedBoard board)
@@ -260,6 +268,10 @@ public class GameManager : MonoBehaviour
         {
             GameObject card = Instantiate(CardPrefab, currentPlayerHandSlots.GetChild(i));
             card.transform.position += new Vector3(0, 0, currentPlayerHand.Count - i);
+            if (currentPlayerHandSlots.IsChildOf(Player2.transform))
+            {
+                card.transform.Rotate(new Vector3(0, 0, 180f));
+            }
             card.GetComponent<CardScript>().SetUpCardInfo(currentPlayerHand[i]);
         }
     }
@@ -292,8 +304,15 @@ public class GameManager : MonoBehaviour
     IEnumerator PatronActivation(GameObject PatronObject)
     {
         var patronID = PatronObject.GetComponent<PatronScript>().patronID;
-        Board.PatronActivation(patronID);
-        RefreshBoard();
+        if (Board.GetSerializer().CurrentPlayer.PatronCalls > 0 && Board.CanPatronBeActivated(patronID))
+        {
+            Board.PatronActivation(patronID);
+            RefreshBoard();
+        }
+        else
+        {
+            StartCoroutine(Messages.ShowMessage(ErrorTextField, "You can't activate this patron", 2));
+        }
         yield return null;
     }
 
@@ -303,13 +322,13 @@ public class GameManager : MonoBehaviour
         var owner = AgentObject.GetComponent<AgentScript>().GetOwner();
         if (owner == Board.CurrentPlayerId)
         {
-            try
+            if(!agent.Activated)
             {
                 Board.ActivateAgent(agent.RepresentingCard);
             }
-            catch (Exception e)
+            else
             {
-                StartCoroutine(Messages.ShowMessage(ErrorTextField, e.Message, 2));
+                StartCoroutine(Messages.ShowMessage(ErrorTextField, "This agent is already activated", 2));
             }
         }
         else if (owner == Board.EnemyPlayerId)
@@ -319,6 +338,7 @@ public class GameManager : MonoBehaviour
             if (result != null)
                 EndGame(result);
         }
+        RefreshBoard();
         yield return null;
     }
 
@@ -368,8 +388,8 @@ public class GameManager : MonoBehaviour
         if (move.Command != CommandEnum.END_TURN)
             MoveText.GetComponent<TextMeshProUGUI>().text = MovesHistoryUI.ParseMove(move);
         else
-            MoveText.GetComponent<TextMeshProUGUI>().text = "End turn";
-        
+            StartCoroutine(Messages.ShowMessage(MoveText, "End turn", 2));
+
         MoveBot(move);
     }
 

@@ -11,6 +11,10 @@ public class MiscButtonHandler : MonoBehaviour
     {
         Application.Quit();
     }
+    public void ConfirmPatronChoices()
+    {
+        FindObjectOfType<PatronSelectionScript>().ProceedGame();
+    }
 
     public void RefreshScene()
     {
@@ -57,5 +61,7 @@ public class MiscButtonHandler : MonoBehaviour
     {
         SettingsPanel.SetActive(!SettingsPanel.activeInHierarchy);
     }
+
+    
 
 }

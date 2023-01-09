@@ -7,6 +7,7 @@ using UnityEngine;
 public class Logger : MonoBehaviour
 {
     public static Logger Instance;
+    private List<CompletedAction> completedActions = new List<CompletedAction>();
     private void Awake()
     {
         if (Instance != null && Instance != this)
@@ -18,8 +19,14 @@ public class Logger : MonoBehaviour
             Instance = this;
         }
     }
-    public List<CompletedAction> GetAdvancedMoves()
+    public List<CompletedAction> GetMoves()
     {
-        return GameManager.Board.GetSerializer().CompletedActions;
+        return completedActions;
+    }
+
+    public void UpdateMoves(List<CompletedAction> moves)
+    {
+        completedActions.Clear();
+        completedActions.AddRange(moves);
     }
 }
