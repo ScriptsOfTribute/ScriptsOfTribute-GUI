@@ -34,7 +34,7 @@ public class EndGameUI : MonoBehaviour
         Color objectColor = BlackFade.GetComponent<UnityEngine.UI.Image>().color;
         while (BlackFade.GetComponent<UnityEngine.UI.Image>().color.a > 0)
         {
-            fadeAmount = objectColor.a - (1f * Time.deltaTime);
+            fadeAmount = objectColor.a - (3f * Time.deltaTime);
             objectColor = new Color(0, 0, 0, fadeAmount);
             BlackFade.GetComponent<UnityEngine.UI.Image>().color = objectColor;
             yield return null;
@@ -75,39 +75,24 @@ public class EndGameUI : MonoBehaviour
         float currentOffset = 0f;
         string botName = TalesOfTributeAI.Instance.Name;
         string whoMoves = PlayerEnum.PLAYER1 == PlayerScript.Instance.playerID ? "Player" : botName;
-        var roundObject = new GameObject($"Round nr. {_roundCounter}");
-        roundObject.transform.SetParent(Container.transform);
-        roundObject.AddComponent<TextMeshProUGUI>();
-        roundObject.GetComponent<RectTransform>().sizeDelta = new Vector2(1000, _height);
-        roundObject.GetComponent<TextMeshProUGUI>().SetText($"Round nr. {_roundCounter}, moves: {whoMoves}");
-        roundObject.GetComponent<TextMeshProUGUI>().fontSize = 28f;
-        roundObject.GetComponent<TextMeshProUGUI>().font = FontAsset;
-        roundObject.GetComponent<TextMeshProUGUI>().fontStyle = TMPro.FontStyles.Bold;
+        var textObject = new GameObject($"Round nr. {_roundCounter}");
+        textObject.transform.SetParent(Container.transform);
+        textObject.AddComponent<TextMeshProUGUI>();
+        textObject.GetComponent<RectTransform>().sizeDelta = new Vector2(770, _height);
+        textObject.GetComponent<TextMeshProUGUI>().SetText($"<size=110%><b>Round nr. {_roundCounter}, moves: {whoMoves}</b><size=100%>\n");
+        textObject.GetComponent<TextMeshProUGUI>().fontSize = 28f;
+        textObject.GetComponent<TextMeshProUGUI>().font = FontAsset;
+        textObject.GetComponent<TextMeshProUGUI>().lineSpacing = 5;
         foreach (CompletedAction move in movesList)
         {
-            Debug.Log(move);
             var stringMove = ParseCompletedAction(move);
-            var moveObject = Instantiate(MoveObject, Container.transform);
-            moveObject.AddComponent<TextMeshProUGUI>();
-            moveObject.GetComponent<TextMeshProUGUI>().SetText(stringMove);
-            moveObject.GetComponent<TextMeshProUGUI>().fontSize = 20f;
-            moveObject.GetComponent<TextMeshProUGUI>().font = FontAsset;
-            moveObject.GetComponent<RectTransform>().sizeDelta = new Vector2((float)stringMove.Length * 15f, _height);
-            moveObject.GetComponent<RectTransform>().anchoredPosition = new Vector2(0, _startY - currentOffset);
+            textObject.GetComponent<TextMeshProUGUI>().text += $"{stringMove}\n";
             currentOffset += _offset;
             if (move.Type == CompletedActionType.END_TURN)
             {
                 _roundCounter++;
                 whoMoves = whoMoves == "Player" ? botName : "Player";
-                roundObject = new GameObject($"Round nr. {_roundCounter}");
-                roundObject.transform.SetParent(Container.transform);
-                roundObject.AddComponent<RectTransform>();
-                roundObject.GetComponent<RectTransform>().sizeDelta = new Vector2(1000, _height);
-                roundObject.AddComponent<TextMeshProUGUI>();
-                roundObject.GetComponent<TextMeshProUGUI>().SetText($"Round nr. {_roundCounter}, moves: {whoMoves}");
-                roundObject.GetComponent<TextMeshProUGUI>().fontSize = 28f;
-                roundObject.GetComponent<TextMeshProUGUI>().font = FontAsset;
-                roundObject.GetComponent<TextMeshProUGUI>().fontStyle = TMPro.FontStyles.Bold;
+                textObject.GetComponent<TextMeshProUGUI>().text += $"<size=110%><b>Round nr. {_roundCounter}, moves: {whoMoves}\n</b><size=100%>";
             }
         }
     }

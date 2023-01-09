@@ -155,10 +155,12 @@ public class GameManager : MonoBehaviour
         {
             StartCoroutine(EndGame(endGame));
         }
-            
+        else
+        {
+            RefreshBoard();
+            StartTurn();
+        }
 #nullable disable
-        RefreshBoard();
-        StartTurn();
     }
 
     IEnumerator EndGame(EndGameState state)

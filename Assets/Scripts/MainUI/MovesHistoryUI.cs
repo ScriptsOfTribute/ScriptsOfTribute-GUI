@@ -102,7 +102,6 @@ public class MovesHistoryUI : MonoBehaviour
             moveObject.GetComponent<CardMoveUI>().CardHolder = CardHolder;
             moveObject.GetComponent<CardMoveUI>().TargetCardHolder = TargetCardHolder;
             moveObject.GetComponent<CardMoveUI>().SourceCardHolder = SourceCardHolder;
-            moveObject.AddComponent<TextMeshProUGUI>();
             moveObject.GetComponent<TextMeshProUGUI>().SetText(stringMove);
             moveObject.GetComponent<TextMeshProUGUI>().fontSize = 20f;
             moveObject.GetComponent<TextMeshProUGUI>().font = FontAsset;

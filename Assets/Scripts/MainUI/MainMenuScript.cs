@@ -13,6 +13,11 @@ public class MainMenuScript : MonoBehaviour, IPointerEnterHandler, IPointerExitH
     public static bool BotSelected = false;
     public static bool SideSelected = false;
 
+    private void Start()
+    {
+        BotSelected = false;
+        SideSelected = false;
+    }
     private void Update()
     {
         if (BotSelected && SideSelected)
