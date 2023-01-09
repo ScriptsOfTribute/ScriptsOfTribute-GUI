@@ -34,13 +34,11 @@ public class Zoomer : MonoBehaviour
         }
         transform.position = new Vector3(transform.position.x, newY, -3);
 
-        Debug.Log(transform.rotation);
         if(transform.rotation.z == 1f && transform.tag == "Card")
         {
             _rotated = true;
             var targetAngles = transform.eulerAngles + 180f * Vector3.forward;
             transform.eulerAngles = targetAngles;
-            Debug.Log(targetAngles);
         }
     }
 

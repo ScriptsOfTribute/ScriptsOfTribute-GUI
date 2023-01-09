@@ -1,4 +1,3 @@
-using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
@@ -32,9 +31,14 @@ public class GameManager : MonoBehaviour
     public GameObject MoveText;
     public GameObject ErrorTextField;
     public GameObject BotName;
+    public GameObject BlackFade;
+
+    public AudioSource cardAudio;
+    public AudioSource buyCardAudio;
 
     public static bool isUIActive = false;
     public static bool isBotPlaying = false;
+    private Coroutine _botTextCoroutine = null;
     void Start()
     {
         BotName.GetComponent<TextMeshProUGUI>().SetText(TalesOfTributeAI.Instance.Name);
@@ -149,8 +153,7 @@ public class GameManager : MonoBehaviour
         EndGameState? endGame = Board.CheckWinner();
         if (endGame != null)
         {
-            EndGame(endGame);
-            
+            StartCoroutine(EndGame(endGame));
         }
             
 #nullable disable
@@ -158,11 +161,22 @@ public class GameManager : MonoBehaviour
         StartTurn();
     }
 
-    void EndGame(EndGameState state)
+    IEnumerator EndGame(EndGameState state)
     {
-        transform.parent.gameObject.SetActive(false);
+        float fadeAmount = 5f;
+        Color objectColor = BlackFade.GetComponent<UnityEngine.UI.Image>().color;
+        while (BlackFade.GetComponent<UnityEngine.UI.Image>().color.a < 1)
+        {
+            fadeAmount = objectColor.a + (1f * Time.deltaTime);
+            objectColor = new Color(0, 0, 0, fadeAmount);
+            BlackFade.GetComponent<UnityEngine.UI.Image>().color = objectColor;
+            yield return null;
+        }
+        
         EndGameUI.SetActive(true);
-        EndGameUI.GetComponent<EndGameUI>().SetUp(state);        
+        yield return StartCoroutine(EndGameUI.GetComponent<EndGameUI>().SetUp(state));
+        transform.parent.gameObject.SetActive(false);
+        yield return null;
     }
 
     void RefreshAgents(SerializedBoard board)
@@ -260,7 +274,7 @@ public class GameManager : MonoBehaviour
         }
         List<UniqueCard> currentPlayerHand = board.CurrentPlayer.Hand;
         currentPlayerHandSlots.position = new Vector3(
-            0.375f*(5 - currentPlayerHand.Count), 
+            -1.2f + 0.375f*(5 - currentPlayerHand.Count), 
             currentPlayerHandSlots.position.y, 
             currentPlayerHandSlots.position.z
         );
@@ -280,6 +294,7 @@ public class GameManager : MonoBehaviour
     {
         var card = CardObject.GetComponent<CardScript>().GetCard();
         Board.PlayCard(card);
+        cardAudio.Play();
         RefreshBoard();
         yield return null;
     }
@@ -290,6 +305,7 @@ public class GameManager : MonoBehaviour
         bool canAfford = CardObject.GetComponent<CardScript>().CanPlayerAfford();
         if (canAfford)
         {
+            buyCardAudio.Play();
             Board.BuyCard(card);
         }
         else
@@ -336,7 +352,7 @@ public class GameManager : MonoBehaviour
             var agentCard = AgentObject.GetComponent<AgentScript>().GetAgent().RepresentingCard;
             var result = Board.AttackAgent(agentCard);
             if (result != null)
-                EndGame(result);
+                StartCoroutine(EndGame(result));
         }
         RefreshBoard();
         yield return null;
@@ -382,13 +398,15 @@ public class GameManager : MonoBehaviour
         var move = await TalesOfTributeAI.Instance.Play(Board.GetSerializer(), Board.GetListOfPossibleMoves());
         if (move == null)
         {
-            EndGame(new EndGameState(PlayerScript.Instance.playerID, GameEndReason.MOVE_TIMEOUT, "Bot didn't move in time!"));
+            StartCoroutine(EndGame(new EndGameState(PlayerScript.Instance.playerID, GameEndReason.MOVE_TIMEOUT, "Bot didn't move in time!")));
             return;
         }
+        if (_botTextCoroutine != null)
+            StopCoroutine(_botTextCoroutine);
         if (move.Command != CommandEnum.END_TURN)
-            MoveText.GetComponent<TextMeshProUGUI>().text = MovesHistoryUI.ParseMove(move);
+            _botTextCoroutine = StartCoroutine(Messages.ShowMessage(MoveText, MovesHistoryUI.ParseMove(move), 2));
         else
-            StartCoroutine(Messages.ShowMessage(MoveText, "End turn", 2));
+            _botTextCoroutine = StartCoroutine(Messages.ShowMessage(MoveText, "End turn", 2));
 
         MoveBot(move);
     }
@@ -401,20 +419,20 @@ public class GameManager : MonoBehaviour
             move = await TalesOfTributeAI.Instance.Play(Board.GetSerializer(), Board.GetListOfPossibleMoves());
             if (move == null)
             {
-                EndGame(new EndGameState(PlayerScript.Instance.playerID, GameEndReason.MOVE_TIMEOUT, "Bot didn't move in time!"));
+                StartCoroutine(EndGame(new EndGameState(PlayerScript.Instance.playerID, GameEndReason.MOVE_TIMEOUT, "Bot didn't move in time!")));
                 return;
             }
-            MoveBot(move);
+            MoveBot(move, false);
         } while (move.Command != CommandEnum.END_TURN);
         
     }
 
-    void MoveBot(Move move)
+    void MoveBot(Move move, bool soundOn = true)
     {
-        ParseMove(move);
+        ParseMove(move, soundOn);
     }
 
-    void ParseMove(Move move)
+    void ParseMove(Move move, bool soundOn)
     {
         if (move.Command == CommandEnum.END_TURN)
         {
@@ -426,35 +444,39 @@ public class GameManager : MonoBehaviour
             var m = move as SimpleCardMove;
             var result = Board.PlayCard(m.Card);
             if (result != null)
-                EndGame(result);
+                StartCoroutine(EndGame(result));
+            else if(soundOn)
+                cardAudio.Play();
         }
         else if (move.Command == CommandEnum.ATTACK)
         {
             var m = move as SimpleCardMove;
             var result = Board.AttackAgent(m.Card);
             if (result != null)
-                EndGame(result);
+                StartCoroutine(EndGame(result));
         }
         else if (move.Command == CommandEnum.BUY_CARD)
         {
             var m = move as SimpleCardMove;
             var result = Board.BuyCard(m.Card);
             if (result != null)
-                EndGame(result);
+                StartCoroutine(EndGame(result));
+            else if (soundOn)
+                buyCardAudio.Play();
         }
         else if (move.Command == CommandEnum.ACTIVATE_AGENT)
         {
             var m = move as SimpleCardMove;
             var result = Board.ActivateAgent(m.Card);
             if (result != null)
-                EndGame(result);
+                StartCoroutine(EndGame(result));
         }
         else if (move.Command == CommandEnum.CALL_PATRON)
         {
             var m = move as SimplePatronMove;
             var result = Board.PatronActivation(m.PatronId);
             if (result != null)
-                EndGame(result);
+                StartCoroutine(EndGame(result));
         }
         else if (move.Command == CommandEnum.MAKE_CHOICE)
         {
@@ -462,13 +484,13 @@ public class GameManager : MonoBehaviour
             {
                 var result = Board.MakeChoice(cardChoice.Choices);
                 if (result != null)
-                    EndGame(result);
+                    StartCoroutine(EndGame(result));
             }
             else if (move is MakeChoiceMove<UniqueEffect> effectChoice)
             {
                 var result = Board.MakeChoice(effectChoice.Choices.First());
                 if (result != null)
-                    EndGame(result);
+                    StartCoroutine(EndGame(result));
             }
         }
         RefreshBoard();

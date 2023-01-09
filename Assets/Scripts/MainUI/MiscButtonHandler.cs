@@ -21,6 +21,11 @@ public class MiscButtonHandler : MonoBehaviour
         SceneManager.LoadScene(SceneManager.GetActiveScene().name, LoadSceneMode.Single);
     }
 
+    public void LoadBotvsPlayer()
+    {
+        SceneManager.LoadScene(1);
+    }
+
     public void ChangeResolution1280x720()
     {
         Screen.SetResolution(1280, 720, false);

@@ -1,4 +1,5 @@
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Text;
 using TalesOfTribute;
@@ -16,18 +17,29 @@ public class EndGameUI : MonoBehaviour
     public GameObject Container;
     public GameObject MoveObject;
     public TMP_FontAsset FontAsset;
+    public GameObject BlackFade;
     private int _roundCounter = 1;
     private float _startY = -40f;
     private float _offset = 60f;
     private float _width = 400;
     private float _height = 50;
 
-    public void SetUp(EndGameState state)
+    public IEnumerator SetUp(EndGameState state)
     {
         Winner.GetComponent<TextMeshProUGUI>().SetText(ParseWinner(state.Winner));
         Reason.GetComponent<TextMeshProUGUI>().SetText(ParseReason(state));
         //AdditionalContext.GetComponent<TextMeshProUGUI>().SetText(state.AdditionalContext);
         ShowMoves();
+        float fadeAmount = 5f;
+        Color objectColor = BlackFade.GetComponent<UnityEngine.UI.Image>().color;
+        while (BlackFade.GetComponent<UnityEngine.UI.Image>().color.a > 0)
+        {
+            fadeAmount = objectColor.a - (1f * Time.deltaTime);
+            objectColor = new Color(0, 0, 0, fadeAmount);
+            BlackFade.GetComponent<UnityEngine.UI.Image>().color = objectColor;
+            yield return null;
+        }
+        yield return null;
     }
 
     string ParseWinner(PlayerEnum winner)

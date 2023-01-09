@@ -86,7 +86,7 @@ public class PatronSelectionScript : MonoBehaviour
         else
         {
             EndGameUI.SetActive(true);
-            EndGameUI.GetComponent<EndGameUI>().SetUp(new EndGameState(PlayerScript.Instance.playerID, GameEndReason.PATRON_SELECTION_TIMEOUT));
+            StartCoroutine(EndGameUI.GetComponent<EndGameUI>().SetUp(new EndGameState(PlayerScript.Instance.playerID, GameEndReason.PATRON_SELECTION_TIMEOUT)));
             this.enabled = false;
             return;
         }
