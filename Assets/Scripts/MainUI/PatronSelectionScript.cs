@@ -22,53 +22,69 @@ public class PatronSelectionScript : MonoBehaviour
     private int counter = 0;
     public GameObject EndGameUI;
     public GameObject ConfirmButton;
+    private bool _AIselecting;
+    private bool _updatePerformed;
     void Start()
     {
         selectedPatrons = new List<PatronId>();
         availablePatrons = patrons.Select(p => p.GetComponent<PatronScript>().patronID).ToList();
+        _AIselecting = false;
         if (TalesOfTributeAI.Instance.botID == PlayerEnum.PLAYER1)
         {
+            _AIselecting = true;
             AIPickPatron();
+            _AIselecting = false;
         }
-        
+        _updatePerformed = false;
     }
 
     private void Update()
     {
-        if (selectedPatrons.Count == 5)
+        if (selectedPatrons.Count == 4 && !_updatePerformed)
         {
             ConfirmButton.GetComponent<Button>().interactable = true;
+            foreach(var patron in patrons)
+            {
+                if (!selectedPatrons.Contains(patron.GetComponent<PatronScript>().patronID))
+                {
+                    patron.GetComponent<Button>().interactable = false;
+                }
+            }
+            _updatePerformed = true;
         }
 
     }
 
-    public async void PatronClicked(GameObject patron)
+    public void PatronClicked(GameObject patron)
     {
-        if (selectedPatrons.Count >= 5)
+        if (selectedPatrons.Count >= 4 || _AIselecting)
         {
             return;
         }
         PatronId id = patron.GetComponent<PatronScript>().patronID;
+        if (selectedPatrons.Contains(id))
+        {
+            return;
+        }
         selectedPatrons.Add(id);
         availablePatrons.Remove(id);
         patron.transform.position = slots[counter].transform.position;
         slots[counter].transform.GetChild(0).GetComponent<TextMeshProUGUI>().SetText("Player pick");
         counter++;
+        patron.GetComponent<Button>().enabled = false;
 
         if (TalesOfTributeAI.Instance.botID == PlayerEnum.PLAYER2 && selectedPatrons.Count == 1)
         {
+            _AIselecting = true;
             AIPickPatron();
-            selectedPatrons.Add(PatronId.TREASURY);
-            await Task.Delay(100);
             AIPickPatron();
+            _AIselecting = false;
         }
-        else if (TalesOfTributeAI.Instance.botID == PlayerEnum.PLAYER1 && selectedPatrons.Count == 4)
+        else if (TalesOfTributeAI.Instance.botID == PlayerEnum.PLAYER1 && selectedPatrons.Count == 3)
         {
+            _AIselecting = true;
             AIPickPatron();
-        }
-        else if (TalesOfTributeAI.Instance.botID == PlayerEnum.PLAYER1 && selectedPatrons.Count == 2)
-        {
-            selectedPatrons.Add(PatronId.TREASURY);
+            _AIselecting = false;
         }
     }
 
@@ -80,6 +96,7 @@ public class PatronSelectionScript : MonoBehaviour
             selectedPatrons.Add(id);
             availablePatrons.Remove(id);
             patrons.First(p => p.GetComponent<PatronScript>().patronID == id).transform.position = slots[counter].transform.position;
+            patrons.First(p => p.GetComponent<PatronScript>().patronID == id).GetComponent<Button>().enabled = false;
             slots[counter].transform.GetChild(0).GetComponent<TextMeshProUGUI>().SetText("AI pick");
             counter++;
         }
@@ -94,6 +111,7 @@ public class PatronSelectionScript : MonoBehaviour
 
     public void ProceedGame()
     {
+        selectedPatrons.Insert(2, PatronId.TREASURY);
         MainGame.SetActive(true);
         self.SetActive(false);
     }

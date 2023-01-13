@@ -1,11 +1,10 @@
-using System.Collections;
 using System.Collections.Generic;
 using TalesOfTribute;
 using UnityEngine;
 using TMPro;
-using System.Diagnostics.Contracts;
 using System.Linq;
 using TalesOfTribute.Board.Cards;
+using TalesOfTribute.Serializers;
 
 public class CardScript : MonoBehaviour
 {
@@ -17,7 +16,8 @@ public class CardScript : MonoBehaviour
     public TextMeshPro HP;
     public Sprite[] CardSprites;
     private bool _tavernCardPlayerCanAfford;
-    public void SetUpCardInfo(UniqueCard card, bool _canAfford = true)
+    private List<string> _effectsWillEnact = new List<string>();
+    public void SetUpCardInfo(UniqueCard card, ComboState comboState, bool _canAfford = true)
     {
         _card = card;
         GetComponent<SpriteRenderer>().sprite = CardSprites.First(sprite => sprite.name == ParseDeckAndType(card));
@@ -66,6 +66,17 @@ public class CardScript : MonoBehaviour
             color.a = 200 / 255f;
             GetComponent<SpriteRenderer>().color = color;
         }
+        if(comboState.CurrentCombo > 0 && card.Deck != PatronId.TREASURY)
+        {
+            if (card.Effects[comboState.CurrentCombo] != null)
+            {
+                foreach(var effect in card.Effects[comboState.CurrentCombo].Decompose())
+                {
+                    _effectsWillEnact.Add($"{effect} (this card)");
+                }
+            }
+            _effectsWillEnact.AddRange(comboState.All[comboState.CurrentCombo].Select(e => e.ToString()).ToList());
+        }
     }
 
     public UniqueCard GetCard()
@@ -109,5 +120,22 @@ public class CardScript : MonoBehaviour
             _ => ""
         };
         return $"{deck} {type}";
+    }
+
+    private void OnMouseEnter()
+    {
+        if(_effectsWillEnact == null)
+        {
+            return;
+        }
+
+        if ((gameObject.tag == "Card" || _card.Type == CardType.CONTRACT_ACTION || _card.Type == CardType.CONTRACT_AGENT) && _card.Deck != PatronId.TREASURY)
+            FindObjectOfType<ComboHoverUI>().SetUp(_effectsWillEnact);
+    }
+
+    private void OnMouseExit()
+    {
+        if ((gameObject.tag == "Card" || _card.Type == CardType.CONTRACT_ACTION || _card.Type == CardType.CONTRACT_AGENT) && _card.Deck != PatronId.TREASURY)
+            FindObjectOfType<ComboHoverUI>().Close();
     }
 }

@@ -29,6 +29,5 @@ public class PatronSelectionButton : MonoBehaviour, IPointerEnterHandler, IPoint
     public void OnClick()
     {
         FindObjectOfType<PatronSelectionScript>().PatronClicked(this.gameObject);
-        this.GetComponent<Button>().enabled = false;
     }
 }

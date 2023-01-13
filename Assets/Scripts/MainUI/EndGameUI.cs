@@ -7,6 +7,7 @@ using TalesOfTribute.Board;
 using TMPro;
 using UnityEngine;
 using UnityEngine.TextCore.Text;
+using UnityEngine.UIElements;
 
 public class EndGameUI : MonoBehaviour
 {
@@ -30,6 +31,7 @@ public class EndGameUI : MonoBehaviour
         Reason.GetComponent<TextMeshProUGUI>().SetText(ParseReason(state));
         //AdditionalContext.GetComponent<TextMeshProUGUI>().SetText(state.AdditionalContext);
         ShowMoves();
+        GameSeed.GetComponent<TMP_InputField>().text = BoardManager.Instance.GetSeed().ToString();
         float fadeAmount = 5f;
         Color objectColor = BlackFade.GetComponent<UnityEngine.UI.Image>().color;
         while (BlackFade.GetComponent<UnityEngine.UI.Image>().color.a > 0)

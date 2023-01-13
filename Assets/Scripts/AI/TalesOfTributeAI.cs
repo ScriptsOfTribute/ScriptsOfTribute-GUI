@@ -1,9 +1,8 @@
-using System.Collections;
 using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
 using TalesOfTribute;
 using TalesOfTribute.AI;
+using TalesOfTribute.Serializers;
 using UnityEngine;
 
 public class TalesOfTributeAI : MonoBehaviour
@@ -44,17 +43,17 @@ public class TalesOfTributeAI : MonoBehaviour
         var task = Task.Run(() => bot.SelectPatron(availablePatrons, round));
         if (await Task.WhenAny(task, Task.Delay(_timeout)) == task)
         {
-            var move = task.Result;
-            isMoving = false;
-            return move;
+            var patronID = task.Result;
+            if (availablePatrons.Contains(patronID))
+            {
+                isMoving = false;
+                return patronID;
+            }
         }
-        else
-        {
-            return PatronId.TREASURY;
-        }
+        return PatronId.TREASURY;
     }
 
-    public async Task<Move> Play(SerializedBoard serializedBoard, List<Move> possibleMoves)
+    public async Task<Move> Play(GameState serializedBoard, List<Move> possibleMoves)
     {
         isMoving = true;
         var task = Task.Run(() => bot.Play(serializedBoard, possibleMoves));

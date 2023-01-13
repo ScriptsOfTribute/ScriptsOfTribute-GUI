@@ -10,6 +10,7 @@ public class Zoomer : MonoBehaviour
     private float _previousZ;
     private float _previousY;
     private bool _rotated = false;
+    private Quaternion _previousRotation;
 
     private void OnMouseEnter()
     {
@@ -34,12 +35,9 @@ public class Zoomer : MonoBehaviour
         }
         transform.position = new Vector3(transform.position.x, newY, -3);
 
-        if(transform.rotation.z == 1f && transform.tag == "Card")
-        {
-            _rotated = true;
-            var targetAngles = transform.eulerAngles + 180f * Vector3.forward;
-            transform.eulerAngles = targetAngles;
-        }
+        _previousRotation = transform.rotation;
+        var targetAngles = Vector3.zero;
+        transform.eulerAngles = targetAngles;
     }
 
     private void OnMouseExit()
@@ -48,11 +46,7 @@ public class Zoomer : MonoBehaviour
             return;
         transform.localScale /= ZoomValue;
         transform.position = new Vector3(transform.position.x, _previousY, _previousZ);
-        if (_rotated)
-        {
-            var targetAngles = transform.eulerAngles + 180f * Vector3.forward;
-            transform.eulerAngles = targetAngles;
-        }
+        transform.rotation = _previousRotation;
             
     }
 }
