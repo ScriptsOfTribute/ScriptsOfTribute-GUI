@@ -7,14 +7,42 @@ public class MiscButtonHandler : MonoBehaviour
 {
 
     public GameObject SettingsPanel;
+    public GameObject SettingsMenu;
+    public GameObject MainMenu;
     public void CloseApp()
     {
         Application.Quit();
+    }
+    public void ConfirmPatronChoices()
+    {
+        FindObjectOfType<PatronSelectionScript>().ProceedGame();
     }
 
     public void RefreshScene()
     {
         SceneManager.LoadScene(SceneManager.GetActiveScene().name, LoadSceneMode.Single);
+    }
+
+    public void LoadMainMenu()
+    {
+        SceneManager.LoadScene(0);
+    }
+
+    public void FromSettingsToMainMenu()
+    {
+        MainMenu.SetActive(true);
+        SettingsMenu.SetActive(false);
+    }
+
+    public void FromMainMenuToSettings()
+    {
+        SettingsMenu.SetActive(true);
+        MainMenu.SetActive(false);
+    }
+
+    public void LoadBotvsPlayer()
+    {
+        SceneManager.LoadScene(1);
     }
 
     public void ChangeResolution1280x720()
@@ -57,5 +85,7 @@ public class MiscButtonHandler : MonoBehaviour
     {
         SettingsPanel.SetActive(!SettingsPanel.activeInHierarchy);
     }
+
+    
 
 }

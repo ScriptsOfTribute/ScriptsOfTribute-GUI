@@ -25,12 +25,12 @@ public class CardUIButtonScript : MonoBehaviour, IPointerEnterHandler, IPointerE
         
         if (!checkmark.activeSelf)
         {
-            bool canMark = FindObjectOfType<CardChoiceUIScript>().SelectCard(_card);
+            bool canMark = FindObjectOfType<CardChoiceUIScript>().SelectCard(gameObject);
             checkmark.SetActive(canMark);
         }
         else
         {
-            FindObjectOfType<CardChoiceUIScript>().UnSelectCard(_card);
+            FindObjectOfType<CardChoiceUIScript>().UnSelectCard(gameObject);
             checkmark.SetActive(false);
         }
             

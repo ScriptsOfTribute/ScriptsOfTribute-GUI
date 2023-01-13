@@ -6,6 +6,7 @@ using TalesOfTribute.Serializers;
 using TMPro;
 using TalesOfTribute.Board.Cards;
 using UnityEngine;
+using System.Linq;
 
 public class CardChoiceUIScript : MonoBehaviour
 {
@@ -14,7 +15,7 @@ public class CardChoiceUIScript : MonoBehaviour
     public GameObject ChoiceTopic;
 
     public SerializedChoice cardChoice;
-    private List<UniqueCard> choicesSelected;
+    private List<GameObject> choicesSelected;
 
     private bool _completed;
 
@@ -31,11 +32,11 @@ public class CardChoiceUIScript : MonoBehaviour
         }
         else if (choice.Context.ChoiceType == ChoiceType.CARD_EFFECT)
         {
-            text += $"Card {ParseChoiceFollowUp(choice.ChoiceFollowUp)}";
+            text += $"{ParseChoiceFollowUp(choice.ChoiceFollowUp)}";
         }
         ChoiceTopic.GetComponent<TextMeshProUGUI>().SetText(text + $"- Min. {choice.MinChoices}, Max. {choice.MaxChoices}");
         _completed = false;
-        choicesSelected = new List<UniqueCard>();
+        choicesSelected = new List<GameObject>();
         cardChoice = choice;
         for(int i = 0; i < choice.PossibleCards.Count; i++)
         {
@@ -53,22 +54,26 @@ public class CardChoiceUIScript : MonoBehaviour
         }
     }
 
-    public bool SelectCard(UniqueCard c)
+    public bool SelectCard(GameObject cardObject)
     {
-        if (choicesSelected.Count >= cardChoice.MaxChoices)
+        if (choicesSelected.Count > cardChoice.MaxChoices)
             return false;
-        choicesSelected.Add(c);
+        if (choicesSelected.Count == cardChoice.MaxChoices)
+            UnSelectCard(choicesSelected[0]);
+        choicesSelected.Add(cardObject);
+        cardObject.GetComponent<CardUIButtonScript>().checkmark.SetActive(true);
         return true;
     }
 
-    public void UnSelectCard(UniqueCard c)
+    public void UnSelectCard(GameObject cardObject)
     {
-        choicesSelected.Remove(c);
+        choicesSelected.Remove(cardObject);
+        cardObject.GetComponent<CardUIButtonScript>().checkmark.SetActive(false);
     }
 
     public void MakeChoice()
     {
-        GameManager.Board.MakeChoice(choicesSelected);
+        GameManager.Board.MakeChoice(choicesSelected.Select(obj => obj.GetComponent<CardUIButtonScript>().GetCard()).ToList());
         CleanUpChoices();
         _completed = true;
     }

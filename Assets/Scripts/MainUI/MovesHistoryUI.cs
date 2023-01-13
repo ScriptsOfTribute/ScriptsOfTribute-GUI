@@ -23,10 +23,13 @@ public class MovesHistoryUI : MonoBehaviour
     private float _width = 400;
     private float _height = 50;
     private bool lever = true;
+    private int _roundCounter = 1;
 
     private void OnEnable()
     {
         lever = true;
+        _roundCounter = 1;
+        CleanView();
         ShowAdvancedMoves();
     }
     private void OnDisable()
@@ -80,10 +83,18 @@ public class MovesHistoryUI : MonoBehaviour
 
     public void ShowAdvancedMoves()
     {
-        CleanView();
-
-        List<CompletedAction> movesList = Logger.Instance.GetAdvancedMoves();
+        List<CompletedAction> movesList = Logger.Instance.GetMoves();
         float currentOffset = 0f;
+        string botName = TalesOfTributeAI.Instance.Name;
+        string whoMoves = PlayerEnum.PLAYER1 == PlayerScript.Instance.playerID ? "Player" : botName;
+        var roundObject = new GameObject($"Round nr. {_roundCounter}");
+        roundObject.transform.SetParent(Container.transform);
+        roundObject.AddComponent<TextMeshProUGUI>();
+        roundObject.GetComponent<RectTransform>().sizeDelta = new Vector2(1000, _height);
+        roundObject.GetComponent<TextMeshProUGUI>().SetText($"Round nr. {_roundCounter}, moves: {whoMoves}");
+        roundObject.GetComponent<TextMeshProUGUI>().fontSize = 28f;
+        roundObject.GetComponent<TextMeshProUGUI>().font = FontAsset;
+        roundObject.GetComponent<TextMeshProUGUI>().fontStyle = FontStyles.Bold;
         foreach (CompletedAction move in movesList)
         {
             var stringMove = ParseCompletedAction(move);
@@ -91,7 +102,6 @@ public class MovesHistoryUI : MonoBehaviour
             moveObject.GetComponent<CardMoveUI>().CardHolder = CardHolder;
             moveObject.GetComponent<CardMoveUI>().TargetCardHolder = TargetCardHolder;
             moveObject.GetComponent<CardMoveUI>().SourceCardHolder = SourceCardHolder;
-            moveObject.AddComponent<TextMeshProUGUI>();
             moveObject.GetComponent<TextMeshProUGUI>().SetText(stringMove);
             moveObject.GetComponent<TextMeshProUGUI>().fontSize = 20f;
             moveObject.GetComponent<TextMeshProUGUI>().font = FontAsset;
@@ -111,6 +121,19 @@ public class MovesHistoryUI : MonoBehaviour
                 moveObject.GetComponent<CardMoveUI>().SingleCard = move.TargetCard;
             }
             currentOffset += _offset;
+            if(move.Type == CompletedActionType.END_TURN)
+            {
+                _roundCounter++;
+                whoMoves = whoMoves == "Player" ? botName : "Player";
+                roundObject = new GameObject($"Round nr. {_roundCounter}");
+                roundObject.transform.SetParent(Container.transform);
+                roundObject.AddComponent<TextMeshProUGUI>();
+                roundObject.GetComponent<RectTransform>().sizeDelta = new Vector2(1000, _height);
+                roundObject.GetComponent<TextMeshProUGUI>().SetText($"Round nr. {_roundCounter}, moves: {whoMoves}");
+                roundObject.GetComponent<TextMeshProUGUI>().fontSize = 28f;
+                roundObject.GetComponent<TextMeshProUGUI>().font = FontAsset;
+                roundObject.GetComponent<TextMeshProUGUI>().fontStyle = FontStyles.Bold;
+            }
         }
     }
 
@@ -186,7 +209,7 @@ public class MovesHistoryUI : MonoBehaviour
                 sb.Append($"Heal Agent: Amount: {action.Amount}, Agent: {action.TargetCard.Name}, Source: {source}");
                 break;
             case CompletedActionType.END_TURN:
-                sb.Append("End Turn\n---------------");
+                sb.Append($"End Turn\n---------------");
                 break;
             case CompletedActionType.ADD_PATRON_CALLS:
                 sb.Append($"Increment patron calls - Amount: {action.Amount}, Source: {source}");

@@ -15,6 +15,7 @@ public class AgentScript : MonoBehaviour
     public TextMeshPro Effects;
     public TextMeshPro HP;
     public SpriteRenderer activate;
+    public GameObject Taunt;
     public Sprite[] CardSprites;
 
     private PlayerEnum _owner;
@@ -45,6 +46,7 @@ public class AgentScript : MonoBehaviour
 
         Effects.SetText(effects);
         activate.gameObject.SetActive(card.Activated);
+        Taunt.SetActive(card.RepresentingCard.Taunt);
     }
 
     public SerializedAgent GetAgent()
