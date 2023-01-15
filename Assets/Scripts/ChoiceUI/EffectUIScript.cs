@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using TalesOfTribute;
 using TalesOfTribute.Board.Cards;
 using TalesOfTribute.Serializers;
+using TMPro;
 using UnityEngine;
 
 public class EffectUIScript : MonoBehaviour
@@ -11,6 +12,8 @@ public class EffectUIScript : MonoBehaviour
     private EffectType _right;
     public GameObject Left;
     public GameObject Right;
+    public GameObject Panel;
+    public TextMeshProUGUI TooltipText;
 
     public GameObject EffectCardPrefab;
     public SerializedChoice effectChoice;
@@ -21,6 +24,24 @@ public class EffectUIScript : MonoBehaviour
     private void Start()
     {
         _completed = false;
+    }
+
+    private void Update()
+    {
+        if (Input.GetKeyDown(KeyCode.Space))
+        {
+            Panel.SetActive(!Panel.activeSelf);
+            if (Panel.activeSelf)
+            {
+                SetUpChoices(effectChoice);
+                TooltipText.SetText("[Space] Minimize");
+            }
+            else
+            {
+                CleanUpChoices();
+                TooltipText.SetText("[Space] Show");
+            }
+        }
     }
 
     public bool GetCompletedStatus()

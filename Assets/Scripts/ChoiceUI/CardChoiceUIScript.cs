@@ -13,6 +13,8 @@ public class CardChoiceUIScript : MonoBehaviour
     public GameObject Container;
     public GameObject cardPrefab;
     public GameObject ChoiceTopic;
+    public GameObject Panel;
+    public TextMeshProUGUI TooltipText;
 
     public SerializedChoice cardChoice;
     private List<GameObject> choicesSelected;
@@ -22,6 +24,24 @@ public class CardChoiceUIScript : MonoBehaviour
     private void Start()
     {
         _completed = false;
+    }
+
+    private void Update()
+    {
+        if (Input.GetKeyDown(KeyCode.Space))
+        {
+            Panel.SetActive(!Panel.activeSelf);
+            if (Panel.activeSelf)
+            {
+                SetUpChoices(cardChoice);
+                TooltipText.SetText("[Space] Minimize");
+            }
+            else
+            {
+                CleanUpChoices();
+                TooltipText.SetText("[Space] Show");
+            }
+        }
     }
     public void SetUpChoices(SerializedChoice choice)
     {

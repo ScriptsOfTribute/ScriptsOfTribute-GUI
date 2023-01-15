@@ -227,6 +227,7 @@ public class GameManager : MonoBehaviour
     {
         List<SerializedAgent> currentPlayerAgents = board.CurrentPlayer.Agents;
         List<SerializedAgent> enemyPlayerAgents = board.EnemyPlayer.Agents;
+        ComboStates states = board.ComboStates;
         Transform currentPlayerAgentsSlots = board.CurrentPlayer.PlayerID == PlayerScript.Instance.playerID
                                     ? Player1.transform.GetChild(1) //0th idx is Hand, 1st is Agents
                                     : Player2.transform.GetChild(1);
@@ -253,13 +254,19 @@ public class GameManager : MonoBehaviour
         for (int i = 0; i < currentPlayerAgents.Count; i++)
         {
             GameObject card = Instantiate(AgentPrefab, currentPlayerAgentsSlots.GetChild(i));
-            card.GetComponent<AgentScript>().SetUpCardInfo(currentPlayerAgents[i], board.CurrentPlayer.PlayerID);
+            ComboState state;
+            var isPresent = states.All.TryGetValue(currentPlayerAgents[i].RepresentingCard.Deck, out state);
+            if (!isPresent)
+            {
+                state = new ComboState(new List<UniqueBaseEffect>[1], 0);
+            }
+            card.GetComponent<AgentScript>().SetUpCardInfo(currentPlayerAgents[i], state, board.CurrentPlayer.PlayerID);
         }
 
         for (int i = 0; i < enemyPlayerAgents.Count; i++)
         {
             GameObject card = Instantiate(AgentPrefab, enemyAgentsSlots.GetChild(i));
-            card.GetComponent<AgentScript>().SetUpCardInfo(enemyPlayerAgents[i], board.EnemyPlayer.PlayerID);
+            card.GetComponent<AgentScript>().SetUpCardInfo(enemyPlayerAgents[i], new ComboState(new List<UniqueBaseEffect>[1], 0), board.EnemyPlayer.PlayerID);
         }
     }
 

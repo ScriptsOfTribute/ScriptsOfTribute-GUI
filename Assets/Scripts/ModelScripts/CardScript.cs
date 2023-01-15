@@ -68,14 +68,18 @@ public class CardScript : MonoBehaviour
         }
         if(comboState.CurrentCombo > 0 && card.Deck != PatronId.TREASURY)
         {
-            if (card.Effects[comboState.CurrentCombo] != null)
+            for(int i = 1; i <= comboState.CurrentCombo; i++)
             {
-                foreach(var effect in card.Effects[comboState.CurrentCombo].Decompose())
+                if (card.Effects[i] != null)
                 {
-                    _effectsWillEnact.Add($"{effect} (this card)");
+                    foreach (var effect in card.Effects[i].Decompose())
+                    {
+                        _effectsWillEnact.Add($"{effect} (this card)");
+                    }
                 }
+                _effectsWillEnact.AddRange(comboState.All[i].Select(e => e.ToString()).ToList());
             }
-            _effectsWillEnact.AddRange(comboState.All[comboState.CurrentCombo].Select(e => e.ToString()).ToList());
+            
         }
     }
 

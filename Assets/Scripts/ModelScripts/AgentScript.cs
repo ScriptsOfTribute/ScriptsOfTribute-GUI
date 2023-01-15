@@ -5,6 +5,7 @@ using UnityEngine;
 using TMPro;
 using TalesOfTribute.Serializers;
 using System.Linq;
+using TalesOfTribute.Board.Cards;
 
 public class AgentScript : MonoBehaviour
 {
@@ -17,10 +18,11 @@ public class AgentScript : MonoBehaviour
     public SpriteRenderer activate;
     public GameObject Taunt;
     public Sprite[] CardSprites;
+    private List<string> _effectsWillEnact = new List<string>();
 
     private PlayerEnum _owner;
 
-    public void SetUpCardInfo(SerializedAgent card, PlayerEnum owner)
+    public void SetUpCardInfo(SerializedAgent card, ComboState comboState, PlayerEnum owner)
     {
         _agent = card;
         _owner = owner;
@@ -47,6 +49,22 @@ public class AgentScript : MonoBehaviour
         Effects.SetText(effects);
         activate.gameObject.SetActive(card.Activated);
         Taunt.SetActive(card.RepresentingCard.Taunt);
+
+        if (comboState.CurrentCombo > 0 && card.RepresentingCard.Deck != PatronId.TREASURY)
+        {
+            for (int i = 1; i <= comboState.CurrentCombo; i++)
+            {
+                if (card.RepresentingCard.Effects[i] != null)
+                {
+                    foreach (var effect in card.RepresentingCard.Effects[i].Decompose())
+                    {
+                        _effectsWillEnact.Add($"{effect} (this card)");
+                    }
+                }
+                _effectsWillEnact.AddRange(comboState.All[i].Select(e => e.ToString()).ToList());
+            }
+
+        }
     }
 
     public SerializedAgent GetAgent()
@@ -59,4 +77,17 @@ public class AgentScript : MonoBehaviour
         return _owner;
     }
 
+    private void OnMouseEnter()
+    {
+        if (_effectsWillEnact == null)
+        {
+            return;
+        }
+        FindObjectOfType<ComboHoverUI>().SetUp(_effectsWillEnact);
+    }
+
+    private void OnMouseExit()
+    {
+        FindObjectOfType<ComboHoverUI>().Close();
+    }
 }
