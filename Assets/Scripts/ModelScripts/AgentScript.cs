@@ -79,7 +79,7 @@ public class AgentScript : MonoBehaviour
 
     private void OnMouseEnter()
     {
-        if (_effectsWillEnact == null)
+        if (_effectsWillEnact == null || _agent.Activated)
         {
             return;
         }

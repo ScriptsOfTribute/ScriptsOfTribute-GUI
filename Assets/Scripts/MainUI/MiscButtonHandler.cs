@@ -86,6 +86,9 @@ public class MiscButtonHandler : MonoBehaviour
         SettingsPanel.SetActive(!SettingsPanel.activeInHierarchy);
     }
 
-    
+    public void ClearLogs()
+    {
+        BotLogsScript.Instance.Clear();
+    }
 
 }

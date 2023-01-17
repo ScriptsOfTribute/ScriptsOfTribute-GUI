@@ -57,6 +57,8 @@ public class GameManager : MonoBehaviour
             Board = new TalesOfTributeApi(patrons);
             BoardManager.Instance.SetSeed(Board.Seed);
         }
+        Board.LogTarget = new UnityLogStream();
+        Board.LoggerEnabled = true;
         for (int i = 0; i < Patrons.transform.childCount; i++)
         {
             var slot = Patrons.transform.GetChild(i);
@@ -479,8 +481,10 @@ public class GameManager : MonoBehaviour
             _botTextCoroutine = StartCoroutine(Messages.ShowMessage(MoveText, MovesHistoryUI.ParseMove(move), 2));
         else
             _botTextCoroutine = StartCoroutine(Messages.ShowMessage(MoveText, "End turn", 2));
-
         MoveBot(move);
+        TalesOfTributeAI.Instance.GetLogMessages().ForEach(m => Board.Log(TalesOfTributeAI.Instance.botID, m.Item2));
+        BotLogsScript.Instance.Refresh();
+        Board.Logger.Flush();
     }
 
     public async void PlayBotAllTurnMoves()
@@ -496,7 +500,8 @@ public class GameManager : MonoBehaviour
             }
             MoveBot(move, false);
         } while (move.Command != CommandEnum.END_TURN);
-        
+        TalesOfTributeAI.Instance.GetLogMessages().ForEach(m => Board.Log(TalesOfTributeAI.Instance.botID, m.Item2));
+        BotLogsScript.Instance.Refresh();
     }
 
     void MoveBot(Move move, bool soundOn = true)

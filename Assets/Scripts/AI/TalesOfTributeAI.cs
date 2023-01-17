@@ -1,4 +1,6 @@
+using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using TalesOfTribute;
 using TalesOfTribute.AI;
@@ -82,6 +84,13 @@ public class TalesOfTributeAI : MonoBehaviour
     public string GetBotName()
     {
         return bot.GetType().Name;
+    }
+
+    public List<(DateTime, string)> GetLogMessages()
+    {
+        var messages = bot.LogMessages.ToList();
+        bot.LogMessages.Clear();
+        return messages;
     }
 
 }
