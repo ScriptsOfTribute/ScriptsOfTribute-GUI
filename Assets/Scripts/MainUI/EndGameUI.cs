@@ -80,7 +80,7 @@ public class EndGameUI : MonoBehaviour
         var textObject = new GameObject($"Round nr. {_roundCounter}");
         textObject.transform.SetParent(Container.transform);
         textObject.AddComponent<TextMeshProUGUI>();
-        textObject.GetComponent<RectTransform>().sizeDelta = new Vector2(770, _height);
+        textObject.GetComponent<RectTransform>().sizeDelta = new Vector2(600, _height);
         textObject.GetComponent<TextMeshProUGUI>().SetText($"<size=110%><b>Round nr. {_roundCounter}, moves: {whoMoves}</b><size=100%>\n");
         textObject.GetComponent<TextMeshProUGUI>().fontSize = 28f;
         textObject.GetComponent<TextMeshProUGUI>().font = FontAsset;
