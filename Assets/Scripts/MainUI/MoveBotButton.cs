@@ -1,9 +1,11 @@
+using System.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.UI;
 
 public class MoveBotButton : MonoBehaviour
 { 
     public GameObject BoardManager;
+    private bool isRunningThread = false;
 
     public void Update()
     {
@@ -16,11 +18,12 @@ public class MoveBotButton : MonoBehaviour
     }
     public void PlayMove()
     {
-        BoardManager.GetComponent<GameManager>(). PlayBotMove();
+        Debug.Log("clicked");
+        StartCoroutine(BoardManager.GetComponent<GameManager>().PlayBotMove());
     }
 
     public void PlayAllMoves()
     {
-        BoardManager.GetComponent<GameManager>().PlayBotAllTurnMoves();
+        StartCoroutine(BoardManager.GetComponent<GameManager>().PlayBotAllTurnMoves());  
     }
 }

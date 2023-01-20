@@ -1,17 +1,13 @@
-using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Linq;
-using System.Threading.Tasks;
+using System.Threading;
 using TalesOfTribute;
 using TalesOfTribute.Board;
 using TalesOfTribute.Board.Cards;
 using TalesOfTribute.Serializers;
 using TMPro;
 using UnityEngine;
-using UnityEngine.UI;
-using UnityEngine.UIElements;
 
 public class GameManager : MonoBehaviour
 {
@@ -443,13 +439,15 @@ public class GameManager : MonoBehaviour
     }
 
 
-    public void PlayBotMove()
+    public IEnumerator PlayBotMove()
     {
-        var move = TalesOfTributeAI.Instance.Play(new GameState(Board.GetSerializer()), Board.GetListOfPossibleMoves());
+        var thread = new Thread(() => TalesOfTributeAI.Instance.Play(new GameState(Board.GetSerializer()), Board.GetListOfPossibleMoves()));
+        thread.Start();
+        yield return new WaitUntil(() => !thread.IsAlive);
+        var move = TalesOfTributeAI.Instance.move;
         if (move == null)
         {
-            StartCoroutine(EndGame(new EndGameState(PlayerScript.Instance.playerID, GameEndReason.TURN_TIMEOUT, "Bot didn't finish turn in time!")));
-            return;
+            yield return StartCoroutine(EndGame(new EndGameState(PlayerScript.Instance.playerID, GameEndReason.TURN_TIMEOUT, "Bot didn't finish turn in time!")));
         }
         if (_botTextCoroutine != null)
             StopCoroutine(_botTextCoroutine);
@@ -462,24 +460,31 @@ public class GameManager : MonoBehaviour
         BotLogsScript.Instance.Refresh();
         Board.Logger.Flush();
         RefreshBoard();
+        TalesOfTributeAI.Instance.move = null;
+        yield return null;
     }
 
-    public void PlayBotAllTurnMoves()
+    public IEnumerator PlayBotAllTurnMoves()
     {
         Move move;
         do
         {
-            move = TalesOfTributeAI.Instance.Play(new GameState(Board.GetSerializer()), Board.GetListOfPossibleMoves());
+            var thread = new Thread(() => TalesOfTributeAI.Instance.Play(new GameState(Board.GetSerializer()), Board.GetListOfPossibleMoves()));
+            thread.Start();
+            yield return new WaitUntil(() => !thread.IsAlive);
+            move = TalesOfTributeAI.Instance.move;
             if (move == null)
             {
-                StartCoroutine(EndGame(new EndGameState(PlayerScript.Instance.playerID, GameEndReason.TURN_TIMEOUT, "Bot didn't finish turn in time!")));
-                return;
+                yield return StartCoroutine(EndGame(new EndGameState(PlayerScript.Instance.playerID, GameEndReason.TURN_TIMEOUT, "Bot didn't finish turn in time!")));
             }
             MoveBot(move, false);
+            TalesOfTributeAI.Instance.move = null;
+            RefreshBoard();
         } while (move.Command != CommandEnum.END_TURN);
         TalesOfTributeAI.Instance.GetLogMessages().ForEach(m => Board.Log(TalesOfTributeAI.Instance.botID, m.Item2));
         BotLogsScript.Instance.Refresh();
-        RefreshBoard();
+        
+        yield return null;
     }
 
     void MoveBot(Move move, bool soundOn = true)

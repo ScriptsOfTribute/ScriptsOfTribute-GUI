@@ -20,6 +20,7 @@ public class TalesOfTributeAI : MonoBehaviour
     private TimeSpan _timeout = TimeSpan.FromMilliseconds(30000); //ms, default value
     private TimeSpan _currentTurnTimeElapsed = TimeSpan.Zero;
     public TimeSpan CurrentTurnTimeRemaining => _timeout - _currentTurnTimeElapsed;
+    public Move move = null;
 
     private void Awake()
     {
@@ -64,6 +65,7 @@ public class TalesOfTributeAI : MonoBehaviour
 
     public PatronId SelectPatron(List<PatronId> availablePatrons, int round)
     {
+        isMoving = true;
         var task = SelectPatronTask(availablePatrons, round);
         if (task.Wait(CurrentTurnTimeRemaining))
         {
@@ -77,21 +79,20 @@ public class TalesOfTributeAI : MonoBehaviour
         return PatronId.TREASURY;
     }
 
-    public Move Play(GameState serializedBoard, List<Move> possibleMoves)
+    public void Play(GameState serializedBoard, List<Move> possibleMoves)
     {
         isMoving = true;
-
         var task = MoveTask(serializedBoard, possibleMoves);
         
         if (task.Wait(CurrentTurnTimeRemaining))
         {
-            var move = task.Result;
+            move = task.Result;
             isMoving = false;
-            return move;
         }
         else
         {
-            return null;
+            move = null;
+            isMoving = false;
         }
     }
 
