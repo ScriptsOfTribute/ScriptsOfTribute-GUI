@@ -1,6 +1,9 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
+using System.Threading.Tasks;
 using TalesOfTribute;
 using TalesOfTribute.Board;
 using TalesOfTribute.Board.Cards;
@@ -42,6 +45,7 @@ public class GameManager : MonoBehaviour
 
     private int _PlayerPrestigeStart;
     private int _BotPrestigeStart;
+    private List<GameObject> _trackedObjects = new List<GameObject>();
     void Start()
     {
         BotName.GetComponent<TextMeshProUGUI>().SetText(TalesOfTributeAI.Instance.Name);
@@ -106,6 +110,10 @@ public class GameManager : MonoBehaviour
 
     void RefreshBoard()
     {
+        foreach(var gameObject in _trackedObjects)
+        {
+            Destroy(gameObject);
+        }
         SerializedBoard board = Board.GetSerializer();
         uint patronCalls = board.CurrentPlayer.PatronCalls;
         for(int i = 0; i < Patrons.transform.childCount; i++)
@@ -237,25 +245,11 @@ public class GameManager : MonoBehaviour
                                     ? Player2.transform.GetChild(1) //0th idx is Hand, 1st is Agents
                                     : Player1.transform.GetChild(1);
 
-        for (int i = 0; i < currentPlayerAgentsSlots.childCount; i++)
-        {
-            if (currentPlayerAgentsSlots.GetChild(i).childCount > 0)
-            {
-                Destroy(currentPlayerAgentsSlots.GetChild(i).GetChild(0).gameObject);
-            }
-        }
-
-        for (int i = 0; i < enemyAgentsSlots.childCount; i++)
-        {
-            if (enemyAgentsSlots.GetChild(i).childCount > 0)
-            {
-                Destroy(enemyAgentsSlots.GetChild(i).GetChild(0).gameObject);
-            }
-        }
 
         for (int i = 0; i < currentPlayerAgents.Count; i++)
         {
             GameObject card = Instantiate(AgentPrefab, currentPlayerAgentsSlots.GetChild(i));
+            _trackedObjects.Add(card);
             ComboState state;
             var isPresent = states.All.TryGetValue(currentPlayerAgents[i].RepresentingCard.Deck, out state);
             if (!isPresent)
@@ -268,6 +262,7 @@ public class GameManager : MonoBehaviour
         for (int i = 0; i < enemyPlayerAgents.Count; i++)
         {
             GameObject card = Instantiate(AgentPrefab, enemyAgentsSlots.GetChild(i));
+            _trackedObjects.Add(card);
             card.GetComponent<AgentScript>().SetUpCardInfo(enemyPlayerAgents[i], new ComboState(new List<UniqueBaseEffect>[1], 0), board.EnemyPlayer.PlayerID);
         }
     }
@@ -289,12 +284,12 @@ public class GameManager : MonoBehaviour
 
     void SetUpTavern(SerializedBoard board)
     {
-        CleanupTavern();
         List<UniqueCard> cards = board.TavernAvailableCards;
         ComboStates states = board.ComboStates;
         for (int i = 0; i < Tavern.transform.childCount; i++)
         {
             GameObject card = Instantiate(CardPrefab, Tavern.transform.GetChild(i));
+            _trackedObjects.Add(card);
             card.gameObject.tag = "TavernCard";
             
             ComboState state;
@@ -307,32 +302,12 @@ public class GameManager : MonoBehaviour
         }
     }
 
-    void CleanupTavern()
-    {
-        for (int i = 0; i < Tavern.transform.childCount; i++)
-        {
-            if (Tavern.transform.GetChild(i).childCount > 0)
-                Destroy(Tavern.transform.GetChild(i).GetChild(0).gameObject);
-        }
-    }
-
     void RefreshHand(SerializedBoard board)
     {
         Transform currentPlayerHandSlots = board.CurrentPlayer.PlayerID == PlayerScript.Instance.playerID
                                     ? Player1.transform.GetChild(0) //0th idx is Hand, 1st is Agents
                                     : Player2.transform.GetChild(0);
 
-        for (int i = 0; i < Player1.transform.GetChild(0).childCount; i++)
-        {
-            if (Player1.transform.GetChild(0).GetChild(i).childCount > 0)
-                Destroy(Player1.transform.GetChild(0).GetChild(i).GetChild(0).gameObject);
-        }
-
-        for (int i = 0; i < Player2.transform.GetChild(0).childCount; i++)
-        {
-            if (Player2.transform.GetChild(0).GetChild(i).childCount > 0)
-                Destroy(Player2.transform.GetChild(0).GetChild(i).GetChild(0).gameObject);
-        }
         List<UniqueCard> currentPlayerHand = board.CurrentPlayer.Hand;
         currentPlayerHandSlots.position = new Vector3(
             -1.2f + 0.375f*(5 - currentPlayerHand.Count), 
@@ -345,6 +320,7 @@ public class GameManager : MonoBehaviour
         for (int i = 0; i < currentPlayerHand.Count; i++)
         {
             GameObject card = Instantiate(CardPrefab, currentPlayerHandSlots.GetChild(i));
+            _trackedObjects.Add(card);
             card.transform.position += new Vector3(0, 0, currentPlayerHand.Count - i);
             if (currentPlayerHandSlots.IsChildOf(Player2.transform))
             {
@@ -467,12 +443,12 @@ public class GameManager : MonoBehaviour
     }
 
 
-    public async void PlayBotMove()
+    public void PlayBotMove()
     {
-        var move = await TalesOfTributeAI.Instance.Play(new GameState(Board.GetSerializer()), Board.GetListOfPossibleMoves());
+        var move = TalesOfTributeAI.Instance.Play(new GameState(Board.GetSerializer()), Board.GetListOfPossibleMoves());
         if (move == null)
         {
-            StartCoroutine(EndGame(new EndGameState(PlayerScript.Instance.playerID, GameEndReason.MOVE_TIMEOUT, "Bot didn't move in time!")));
+            StartCoroutine(EndGame(new EndGameState(PlayerScript.Instance.playerID, GameEndReason.TURN_TIMEOUT, "Bot didn't finish turn in time!")));
             return;
         }
         if (_botTextCoroutine != null)
@@ -485,23 +461,25 @@ public class GameManager : MonoBehaviour
         TalesOfTributeAI.Instance.GetLogMessages().ForEach(m => Board.Log(TalesOfTributeAI.Instance.botID, m.Item2));
         BotLogsScript.Instance.Refresh();
         Board.Logger.Flush();
+        RefreshBoard();
     }
 
-    public async void PlayBotAllTurnMoves()
+    public void PlayBotAllTurnMoves()
     {
         Move move;
         do
         {
-            move = await TalesOfTributeAI.Instance.Play(new GameState(Board.GetSerializer()), Board.GetListOfPossibleMoves());
+            move = TalesOfTributeAI.Instance.Play(new GameState(Board.GetSerializer()), Board.GetListOfPossibleMoves());
             if (move == null)
             {
-                StartCoroutine(EndGame(new EndGameState(PlayerScript.Instance.playerID, GameEndReason.MOVE_TIMEOUT, "Bot didn't move in time!")));
+                StartCoroutine(EndGame(new EndGameState(PlayerScript.Instance.playerID, GameEndReason.TURN_TIMEOUT, "Bot didn't finish turn in time!")));
                 return;
             }
             MoveBot(move, false);
         } while (move.Command != CommandEnum.END_TURN);
         TalesOfTributeAI.Instance.GetLogMessages().ForEach(m => Board.Log(TalesOfTributeAI.Instance.botID, m.Item2));
         BotLogsScript.Instance.Refresh();
+        RefreshBoard();
     }
 
     void MoveBot(Move move, bool soundOn = true)
@@ -570,7 +548,6 @@ public class GameManager : MonoBehaviour
                     StartCoroutine(EndGame(result));
             }
         }
-        RefreshBoard();
     }
 
     

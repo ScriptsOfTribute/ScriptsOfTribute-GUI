@@ -90,7 +90,7 @@ public class PatronSelectionScript : MonoBehaviour
 
     public async void AIPickPatron()
     {
-        var id = await TalesOfTributeAI.Instance.SelectPatron(availablePatrons, counter);
+        var id = TalesOfTributeAI.Instance.SelectPatron(availablePatrons, counter);
         if (id != PatronId.TREASURY)
         {
             selectedPatrons.Add(id);

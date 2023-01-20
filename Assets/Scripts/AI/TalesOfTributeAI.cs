@@ -1,11 +1,13 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
 using TalesOfTribute;
 using TalesOfTribute.AI;
 using TalesOfTribute.Serializers;
 using UnityEngine;
+using Debug = UnityEngine.Debug;
 
 public class TalesOfTributeAI : MonoBehaviour
 {
@@ -15,7 +17,9 @@ public class TalesOfTributeAI : MonoBehaviour
 
     public string Name { get; set; }
     public bool isMoving { get; private set; }
-    private int _timeout = 1000; //ms, default value
+    private TimeSpan _timeout = TimeSpan.FromMilliseconds(30000); //ms, default value
+    private TimeSpan _currentTurnTimeElapsed = TimeSpan.Zero;
+    public TimeSpan CurrentTurnTimeRemaining => _timeout - _currentTurnTimeElapsed;
 
     private void Awake()
     {
@@ -40,10 +44,28 @@ public class TalesOfTributeAI : MonoBehaviour
         this.botID = id;
     }
 
-    public async Task<PatronId> SelectPatron(List<PatronId> availablePatrons, int round)
+    private Task<PatronId> SelectPatronTask(List<PatronId> availablePatrons, int round)
     {
-        var task = Task.Run(() => bot.SelectPatron(availablePatrons, round));
-        if (await Task.WhenAny(task, Task.Delay(_timeout)) == task)
+        return Task.Run(() => bot.SelectPatron(availablePatrons, round));
+    }
+
+    private Task<Move> MoveTask(GameState serializedBoard, List<Move> possibleMoves)
+    {
+        return Task.Run(() => {
+            var stopwatch = new Stopwatch();
+            stopwatch.Start();
+            var result = bot.Play(serializedBoard, possibleMoves);
+            stopwatch.Stop();
+            _currentTurnTimeElapsed += stopwatch.Elapsed;
+            return result;
+        }
+        );
+    }
+
+    public PatronId SelectPatron(List<PatronId> availablePatrons, int round)
+    {
+        var task = SelectPatronTask(availablePatrons, round);
+        if (task.Wait(CurrentTurnTimeRemaining))
         {
             var patronID = task.Result;
             if (availablePatrons.Contains(patronID))
@@ -55,11 +77,13 @@ public class TalesOfTributeAI : MonoBehaviour
         return PatronId.TREASURY;
     }
 
-    public async Task<Move> Play(GameState serializedBoard, List<Move> possibleMoves)
+    public Move Play(GameState serializedBoard, List<Move> possibleMoves)
     {
         isMoving = true;
-        var task = Task.Run(() => bot.Play(serializedBoard, possibleMoves));
-        if (await Task.WhenAny(task, Task.Delay(_timeout)) == task)
+
+        var task = MoveTask(serializedBoard, possibleMoves);
+        
+        if (task.Wait(CurrentTurnTimeRemaining))
         {
             var move = task.Result;
             isMoving = false;
@@ -73,13 +97,9 @@ public class TalesOfTributeAI : MonoBehaviour
 
     public void SetTimeout(int value)
     {
-        _timeout = value;
+        _timeout = TimeSpan.FromMilliseconds(value);
     }
 
-    public float GetTimeout()
-    {
-        return _timeout;
-    }
 
     public string GetBotName()
     {

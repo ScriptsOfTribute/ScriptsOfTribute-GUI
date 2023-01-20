@@ -16,7 +16,7 @@ public class MoveBotButton : MonoBehaviour
     }
     public void PlayMove()
     {
-        BoardManager.GetComponent<GameManager>().PlayBotMove();
+        BoardManager.GetComponent<GameManager>(). PlayBotMove();
     }
 
     public void PlayAllMoves()
