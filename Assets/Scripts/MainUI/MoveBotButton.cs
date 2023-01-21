@@ -18,7 +18,6 @@ public class MoveBotButton : MonoBehaviour
     }
     public void PlayMove()
     {
-        Debug.Log("clicked");
         StartCoroutine(BoardManager.GetComponent<GameManager>().PlayBotMove());
     }
 

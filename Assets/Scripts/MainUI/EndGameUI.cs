@@ -59,7 +59,6 @@ public class EndGameUI : MonoBehaviour
         return state.Reason switch
         {
             GameEndReason.INCORRECT_MOVE => $"{loser} made an incorrect move!",
-            GameEndReason.MOVE_TIMEOUT => $"{loser} didn't make move in time!",
             GameEndReason.TURN_TIMEOUT => $"{loser} didn't finish turn in time!",
             GameEndReason.TURN_LIMIT_EXCEEDED => $"Turn limit exceeded!",
             GameEndReason.PRESTIGE_OVER_40_NOT_MATCHED => $"{loser} didn't match prestige over 40!",

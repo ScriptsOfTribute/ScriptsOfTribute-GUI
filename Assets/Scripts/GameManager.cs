@@ -57,8 +57,16 @@ public class GameManager : MonoBehaviour
             Board = new TalesOfTributeApi(patrons);
             BoardManager.Instance.SetSeed(Board.Seed);
         }
-        Board.LogTarget = new UnityLogStream();
-        Board.LoggerEnabled = true;
+        if(TalesOfTributeAI.Instance.botID == PlayerEnum.PLAYER1)
+        {
+            Board.Logger.P1LoggerEnabled = true;
+            Board.Logger.P1LogTarget = new UnityLogStream();
+        } else if (TalesOfTributeAI.Instance.botID == PlayerEnum.PLAYER2)
+        {
+            Board.Logger.P2LoggerEnabled = true;
+            Board.Logger.P2LogTarget = new UnityLogStream();
+        }
+        
         for (int i = 0; i < Patrons.transform.childCount; i++)
         {
             var slot = Patrons.transform.GetChild(i);
@@ -411,7 +419,6 @@ public class GameManager : MonoBehaviour
         {
             yield return StartCoroutine(HandleSingleChoice(pendingChoice));
             pendingChoice = Board.PendingChoice;
-            yield return null;
             RefreshBoard();
         }
         yield return null;
@@ -456,7 +463,7 @@ public class GameManager : MonoBehaviour
         else
             _botTextCoroutine = StartCoroutine(Messages.ShowMessage(MoveText, "End turn", 2));
         MoveBot(move);
-        TalesOfTributeAI.Instance.GetLogMessages().ForEach(m => Board.Log(TalesOfTributeAI.Instance.botID, m.Item2));
+        TalesOfTributeAI.Instance.GetLogMessages().ForEach(m => Board.Logger.Log(TalesOfTributeAI.Instance.botID, m.Item2));
         BotLogsScript.Instance.Refresh();
         Board.Logger.Flush();
         RefreshBoard();
@@ -481,7 +488,7 @@ public class GameManager : MonoBehaviour
             TalesOfTributeAI.Instance.move = null;
             RefreshBoard();
         } while (move.Command != CommandEnum.END_TURN);
-        TalesOfTributeAI.Instance.GetLogMessages().ForEach(m => Board.Log(TalesOfTributeAI.Instance.botID, m.Item2));
+        TalesOfTributeAI.Instance.GetLogMessages().ForEach(m => Board.Logger.Log(TalesOfTributeAI.Instance.botID, m.Item2));
         BotLogsScript.Instance.Refresh();
         
         yield return null;
