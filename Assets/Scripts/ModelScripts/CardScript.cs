@@ -68,7 +68,7 @@ public class CardScript : MonoBehaviour
         }
         if(comboState.CurrentCombo > 0 && card.Deck != PatronId.TREASURY)
         {
-            for(int i = 1; i <= comboState.CurrentCombo; i++)
+            for(int i = 1; i <= 3; i++)
             {
                 if (card.Effects[i] != null)
                 {

@@ -419,6 +419,7 @@ public class GameManager : MonoBehaviour
         {
             yield return StartCoroutine(HandleSingleChoice(pendingChoice));
             pendingChoice = Board.PendingChoice;
+            yield return null;
             RefreshBoard();
         }
         yield return null;
