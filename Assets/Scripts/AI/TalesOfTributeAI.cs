@@ -21,6 +21,8 @@ public class TalesOfTributeAI : MonoBehaviour
     private TimeSpan _currentTurnTimeElapsed = TimeSpan.Zero;
     public TimeSpan CurrentTurnTimeRemaining => _timeout - _currentTurnTimeElapsed;
     public Move move = null;
+    private ulong _seed;
+    public bool SeedSet = false;
 
     private void Awake()
     {
@@ -33,6 +35,7 @@ public class TalesOfTributeAI : MonoBehaviour
             Instance = this;
         }
         botID = PlayerEnum.PLAYER2;
+        bot = null;
     }
 
     public void SetBotInstance(AI botInstance)
@@ -101,7 +104,16 @@ public class TalesOfTributeAI : MonoBehaviour
         _timeout = TimeSpan.FromMilliseconds(value);
     }
 
+    public void SetSeed(ulong seed)
+    {
+        _seed = seed;
+        SeedSet = true;
+    }
 
+    public void SetBotSeed()
+    {
+        bot.Seed = _seed;
+    }
     public string GetBotName()
     {
         return bot.GetType().Name;

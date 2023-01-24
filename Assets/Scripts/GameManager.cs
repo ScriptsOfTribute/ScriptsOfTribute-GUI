@@ -249,8 +249,8 @@ public class GameManager : MonoBehaviour
                                     ? Player2.transform.GetChild(1) //0th idx is Hand, 1st is Agents
                                     : Player1.transform.GetChild(1);
 
-
-        for (int i = 0; i < currentPlayerAgents.Count; i++)
+        int limit = Mathf.Min(currentPlayerAgents.Count, currentPlayerAgentsSlots.childCount);
+        for (int i = 0; i < limit; i++)
         {
             GameObject card = Instantiate(AgentPrefab, currentPlayerAgentsSlots.GetChild(i));
             _trackedObjects.Add(card);
@@ -262,8 +262,8 @@ public class GameManager : MonoBehaviour
             }
             card.GetComponent<AgentScript>().SetUpCardInfo(currentPlayerAgents[i], state, board.CurrentPlayer.PlayerID);
         }
-
-        for (int i = 0; i < enemyPlayerAgents.Count; i++)
+        limit = Mathf.Min(enemyPlayerAgents.Count, enemyAgentsSlots.childCount);
+        for (int i = 0; i < limit; i++)
         {
             GameObject card = Instantiate(AgentPrefab, enemyAgentsSlots.GetChild(i));
             _trackedObjects.Add(card);

@@ -17,6 +17,7 @@ public class SeedSetScript : MonoBehaviour
         if (ulong.TryParse(value, out number))
         {
             BoardManager.Instance.SetSeed(number);
+            TalesOfTributeAI.Instance.SetSeed(number);
         }
         else
         {
