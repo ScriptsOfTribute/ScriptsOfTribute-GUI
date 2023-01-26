@@ -118,7 +118,7 @@ public class GameManager : MonoBehaviour
         {
             Destroy(gameObject);
         }
-        SerializedBoard board = Board.GetSerializer();
+        var board = Board.GetFullGameState();
         uint patronCalls = board.CurrentPlayer.PatronCalls;
         for(int i = 0; i < Patrons.transform.childCount; i++)
         {
@@ -192,7 +192,7 @@ public class GameManager : MonoBehaviour
             
         }
 #nullable disable
-        SerializedBoard board = Board.GetSerializer();
+        var board = Board.GetFullGameState();
         SerializedPlayer player = Board.CurrentPlayerId == PlayerScript.Instance.playerID ?
             board.CurrentPlayer : board.EnemyPlayer;
 
@@ -237,7 +237,7 @@ public class GameManager : MonoBehaviour
         yield return null;
     }
 
-    void RefreshAgents(SerializedBoard board)
+    void RefreshAgents(FullGameState board)
     {
         List<SerializedAgent> currentPlayerAgents = board.CurrentPlayer.Agents;
         List<SerializedAgent> enemyPlayerAgents = board.EnemyPlayer.Agents;
@@ -271,7 +271,7 @@ public class GameManager : MonoBehaviour
         }
     }
 
-    public void RefreshScores(SerializedBoard board)
+    public void RefreshScores(FullGameState board)
     {
         SerializedPlayer player = board.CurrentPlayer.PlayerID == PlayerScript.Instance.playerID ? board.CurrentPlayer : board.EnemyPlayer;
 
@@ -286,7 +286,7 @@ public class GameManager : MonoBehaviour
         BotScore[2].SetText(player.Power.ToString());
     }
 
-    void SetUpTavern(SerializedBoard board)
+    void SetUpTavern(FullGameState board)
     {
         List<UniqueCard> cards = board.TavernAvailableCards;
         ComboStates states = board.ComboStates;
@@ -306,7 +306,7 @@ public class GameManager : MonoBehaviour
         }
     }
 
-    void RefreshHand(SerializedBoard board)
+    void RefreshHand(FullGameState board)
     {
         Transform currentPlayerHandSlots = board.CurrentPlayer.PlayerID == PlayerScript.Instance.playerID
                                     ? Player1.transform.GetChild(0) //0th idx is Hand, 1st is Agents
@@ -374,7 +374,7 @@ public class GameManager : MonoBehaviour
     IEnumerator PatronActivation(GameObject PatronObject)
     {
         var patronID = PatronObject.GetComponent<PatronScript>().patronID;
-        if (Board.GetSerializer().CurrentPlayer.PatronCalls > 0 && Board.CanPatronBeActivated(patronID))
+        if (Board.GetFullGameState().CurrentPlayer.PatronCalls > 0 && Board.CanPatronBeActivated(patronID))
         {
             Board.PatronActivation(patronID);
             RefreshBoard();
@@ -449,7 +449,7 @@ public class GameManager : MonoBehaviour
 
     public IEnumerator PlayBotMove()
     {
-        var thread = new Thread(() => TalesOfTributeAI.Instance.Play(new GameState(Board.GetSerializer()), Board.GetListOfPossibleMoves()));
+        var thread = new Thread(() => TalesOfTributeAI.Instance.Play(new GameState(Board.GetFullGameState()), Board.GetListOfPossibleMoves()));
         thread.Start();
         yield return new WaitUntil(() => !thread.IsAlive);
         var move = TalesOfTributeAI.Instance.move;
@@ -477,7 +477,7 @@ public class GameManager : MonoBehaviour
         Move move;
         do
         {
-            var thread = new Thread(() => TalesOfTributeAI.Instance.Play(new GameState(Board.GetSerializer()), Board.GetListOfPossibleMoves()));
+            var thread = new Thread(() => TalesOfTributeAI.Instance.Play(new GameState(Board.GetFullGameState()), Board.GetListOfPossibleMoves()));
             thread.Start();
             yield return new WaitUntil(() => !thread.IsAlive);
             move = TalesOfTributeAI.Instance.move;

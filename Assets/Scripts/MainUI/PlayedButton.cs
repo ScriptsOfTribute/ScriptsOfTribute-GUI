@@ -10,7 +10,7 @@ public class PlayedButton : MonoBehaviour
 
     public void OnClick()
     {
-        var serializer = GameManager.Board.GetSerializer();
+        var serializer = GameManager.Board.GetFullGameState();
         var playerId = isBot ? TalesOfTributeAI.Instance.botID : PlayerScript.Instance.playerID;
         if (serializer.CurrentPlayer.PlayerID == playerId)
             CardShowUI.GetComponent<CardShowUIScript>().cards = serializer.CurrentPlayer.Played.ToArray();
