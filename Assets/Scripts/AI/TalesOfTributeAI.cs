@@ -7,7 +7,6 @@ using TalesOfTribute;
 using TalesOfTribute.AI;
 using TalesOfTribute.Serializers;
 using UnityEngine;
-using Debug = UnityEngine.Debug;
 
 public class TalesOfTributeAI : MonoBehaviour
 {
