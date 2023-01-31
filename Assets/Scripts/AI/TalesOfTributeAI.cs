@@ -7,6 +7,7 @@ using TalesOfTribute;
 using TalesOfTribute.AI;
 using TalesOfTribute.Serializers;
 using UnityEngine;
+using Debug = UnityEngine.Debug;
 
 public class TalesOfTributeAI : MonoBehaviour
 {
@@ -60,6 +61,9 @@ public class TalesOfTributeAI : MonoBehaviour
             var result = bot.Play(serializedBoard, possibleMoves);
             stopwatch.Stop();
             _currentTurnTimeElapsed += stopwatch.Elapsed;
+            Debug.Log($"Move took: {stopwatch.Elapsed}");
+            Debug.Log($"Elapsed in turn: {_currentTurnTimeElapsed}");
+            Debug.Log($"Time remaining {CurrentTurnTimeRemaining}");
             return result;
         }
         );
@@ -123,6 +127,11 @@ public class TalesOfTributeAI : MonoBehaviour
         var messages = bot.LogMessages.ToList();
         bot.LogMessages.Clear();
         return messages;
+    }
+
+    public void ResetTimer()
+    {
+        _currentTurnTimeElapsed = TimeSpan.Zero;
     }
 
 }

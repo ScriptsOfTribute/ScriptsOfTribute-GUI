@@ -504,6 +504,7 @@ public class GameManager : MonoBehaviour
     {
         if (move.Command == CommandEnum.END_TURN)
         {
+            TalesOfTributeAI.Instance.ResetTimer();
             EndTurn();
             return;
         }
