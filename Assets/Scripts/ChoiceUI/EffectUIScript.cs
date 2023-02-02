@@ -1,8 +1,6 @@
-using System.Collections;
-using System.Collections.Generic;
-using TalesOfTribute;
-using TalesOfTribute.Board.Cards;
-using TalesOfTribute.Serializers;
+using ScriptsOfTribute;
+using ScriptsOfTribute.Board.Cards;
+using ScriptsOfTribute.Serializers;
 using TMPro;
 using UnityEngine;
 

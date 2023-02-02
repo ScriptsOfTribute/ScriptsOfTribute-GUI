@@ -1,6 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
-using TalesOfTribute;
+using ScriptsOfTribute;
 using UnityEngine;
 
 public class CooldownPileButton : MonoBehaviour
@@ -11,7 +11,7 @@ public class CooldownPileButton : MonoBehaviour
     public void OnClick()
     {
         var serializer = GameManager.Board.GetFullGameState();
-        var playerId = isBot ? TalesOfTributeAI.Instance.botID : PlayerScript.Instance.playerID;
+        var playerId = isBot ? ScriptsOfTributeAI.Instance.botID : PlayerScript.Instance.playerID;
         if (serializer.CurrentPlayer.PlayerID == playerId)
             CardShowUI.GetComponent<CardShowUIScript>().cards = serializer.CurrentPlayer.CooldownPile.ToArray();
         else

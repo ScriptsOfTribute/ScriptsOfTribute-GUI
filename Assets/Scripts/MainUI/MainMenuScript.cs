@@ -25,9 +25,9 @@ public class MainMenuScript : MonoBehaviour, IPointerEnterHandler, IPointerExitH
     }
     public void Play()
     {
-        if (TalesOfTributeAI.Instance.SeedSet)
+        if (ScriptsOfTributeAI.Instance.SeedSet)
         {
-            TalesOfTributeAI.Instance.SetBotSeed();
+            ScriptsOfTributeAI.Instance.SetBotSeed();
         }
         PatronSelection.SetActive(true);
         MainMenu.SetActive(false);

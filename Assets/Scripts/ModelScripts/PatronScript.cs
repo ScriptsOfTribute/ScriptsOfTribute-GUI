@@ -1,7 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using TalesOfTribute;
+using ScriptsOfTribute;
 
 //ALLOW LONG LINES
 public class PatronScript : MonoBehaviour

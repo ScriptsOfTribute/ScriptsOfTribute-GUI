@@ -1,8 +1,7 @@
 using UnityEngine;
-using TalesOfTribute;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
-using TalesOfTribute.Board.Cards;
+using ScriptsOfTribute.Board.Cards;
 
 public class CardMoveUI : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler
 {

@@ -1,10 +1,3 @@
-using System;
-using System.Collections;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Text;
-using TalesOfTribute;
 using TMPro;
 using UnityEngine;
 
@@ -13,7 +6,6 @@ public class BotLogsScript : MonoBehaviour
     public static BotLogsScript Instance;
     public GameObject ScrollView;
     public GameObject LogsPanel;
-    private Coroutine currentCoroutine;
     public TMP_FontAsset Font;
 
     private void Awake()
@@ -26,7 +18,6 @@ public class BotLogsScript : MonoBehaviour
         {
             Instance = this;
         }
-        currentCoroutine = null;
     }
 
     public void OnClick()

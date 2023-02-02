@@ -1,11 +1,9 @@
-using System.Collections;
 using System.Collections.Generic;
-using TalesOfTribute;
+using ScriptsOfTribute;
 using UnityEngine;
 using TMPro;
-using TalesOfTribute.Serializers;
+using ScriptsOfTribute.Serializers;
 using System.Linq;
-using TalesOfTribute.Board.Cards;
 
 public class AgentScript : MonoBehaviour
 {

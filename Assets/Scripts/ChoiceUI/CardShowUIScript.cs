@@ -1,9 +1,9 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using TalesOfTribute;
+using ScriptsOfTribute;
 using UnityEngine.UI;
-using TalesOfTribute.Board.Cards;
+using ScriptsOfTribute.Board.Cards;
 using TMPro;
 
 public class CardShowUIScript : MonoBehaviour

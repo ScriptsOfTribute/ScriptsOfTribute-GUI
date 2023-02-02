@@ -1,11 +1,8 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
-using TalesOfTribute;
 using TMPro;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
-using TalesOfTribute.Board.Cards;
+using ScriptsOfTribute.Board.Cards;
 
 public class EffectButtonUIScript : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler
 {

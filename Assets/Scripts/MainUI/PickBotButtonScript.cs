@@ -1,6 +1,6 @@
 using System;
 using System.Reflection;
-using TalesOfTribute.AI;
+using ScriptsOfTribute.AI;
 using TMPro;
 using UnityEngine;
 using UnityEngine.EventSystems;
@@ -20,8 +20,8 @@ public class PickBotButtonScript : MonoBehaviour, IPointerEnterHandler, IPointer
 
     public void OnClick()
     {
-        TalesOfTributeAI.Instance.SetBotInstance(Assembly.CreateInstance(Type.FullName) as AI);
-        TalesOfTributeAI.Instance.Name = Type.Name;
+        ScriptsOfTributeAI.Instance.SetBotInstance(Assembly.CreateInstance(Type.FullName) as AI);
+        ScriptsOfTributeAI.Instance.Name = Type.Name;
         for (int i = 0; i < transform.parent.childCount; i++)
         {
             var button = transform.parent.GetChild(i).gameObject;

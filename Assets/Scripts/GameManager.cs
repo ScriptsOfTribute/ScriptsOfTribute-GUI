@@ -2,16 +2,16 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
-using TalesOfTribute;
-using TalesOfTribute.Board;
-using TalesOfTribute.Board.Cards;
-using TalesOfTribute.Serializers;
+using ScriptsOfTribute;
+using ScriptsOfTribute.Board;
+using ScriptsOfTribute.Board.Cards;
+using ScriptsOfTribute.Serializers;
 using TMPro;
 using UnityEngine;
 
 public class GameManager : MonoBehaviour
 {
-    public static TalesOfTributeApi Board;
+    public static ScriptsOfTributeApi Board;
     public GameObject Tavern;
     public GameObject Player1;
     public GameObject Player2;
@@ -44,24 +44,24 @@ public class GameManager : MonoBehaviour
     private List<GameObject> _trackedObjects = new List<GameObject>();
     void Start()
     {
-        BotName.GetComponent<TextMeshProUGUI>().SetText(TalesOfTributeAI.Instance.Name);
+        BotName.GetComponent<TextMeshProUGUI>().SetText(ScriptsOfTributeAI.Instance.Name);
         PatronId[] patrons = PatronSelectionScript.selectedPatrons.ToArray();
         var seed = BoardManager.Instance.GetSeed();
         
         if (seed != 0)
         {
-            Board = new TalesOfTributeApi(patrons, seed);
+            Board = new ScriptsOfTributeApi(patrons, seed);
         }
         else
         {
-            Board = new TalesOfTributeApi(patrons);
+            Board = new ScriptsOfTributeApi(patrons);
             BoardManager.Instance.SetSeed(Board.Seed);
         }
-        if(TalesOfTributeAI.Instance.botID == PlayerEnum.PLAYER1)
+        if(ScriptsOfTributeAI.Instance.botID == PlayerEnum.PLAYER1)
         {
             Board.Logger.P1LoggerEnabled = true;
             Board.Logger.P1LogTarget = new UnityLogStream();
-        } else if (TalesOfTributeAI.Instance.botID == PlayerEnum.PLAYER2)
+        } else if (ScriptsOfTributeAI.Instance.botID == PlayerEnum.PLAYER2)
         {
             Board.Logger.P2LoggerEnabled = true;
             Board.Logger.P2LogTarget = new UnityLogStream();
@@ -140,7 +140,7 @@ public class GameManager : MonoBehaviour
                     arrow.transform.localPosition = new Vector3(-0.72f, 0, 0);
                     arrow.GetComponent<SpriteRenderer>().color = Color.white;
                 }
-                else if (favor == TalesOfTributeAI.Instance.botID)
+                else if (favor == ScriptsOfTributeAI.Instance.botID)
                 {
                     arrow.transform.rotation = Quaternion.Euler(0f, 0f, -90f);
                     arrow.transform.localPosition = new Vector3(0, 0.72f, 0);
@@ -206,7 +206,7 @@ public class GameManager : MonoBehaviour
             _PlayerPrestigeStart = player.Prestige;
         }
         
-        player = board.CurrentPlayer.PlayerID == TalesOfTributeAI.Instance.botID ? board.CurrentPlayer : board.EnemyPlayer;
+        player = board.CurrentPlayer.PlayerID == ScriptsOfTributeAI.Instance.botID ? board.CurrentPlayer : board.EnemyPlayer;
         if (player.Prestige - _BotPrestigeStart != 0)
         {
             var diff = (player.Prestige - _BotPrestigeStart).ToString();
@@ -279,7 +279,7 @@ public class GameManager : MonoBehaviour
         PlayerScore[1].SetText(player.Prestige.ToString());
         PlayerScore[2].SetText(player.Power.ToString());
         
-        player = board.CurrentPlayer.PlayerID == TalesOfTributeAI.Instance.botID ? board.CurrentPlayer : board.EnemyPlayer;
+        player = board.CurrentPlayer.PlayerID == ScriptsOfTributeAI.Instance.botID ? board.CurrentPlayer : board.EnemyPlayer;
 
         BotScore[0].SetText(player.Coins.ToString());
         BotScore[1].SetText(player.Prestige.ToString());
@@ -449,10 +449,10 @@ public class GameManager : MonoBehaviour
 
     public IEnumerator PlayBotMove()
     {
-        var thread = new Thread(() => TalesOfTributeAI.Instance.Play(new GameState(Board.GetFullGameState()), Board.GetListOfPossibleMoves()));
+        var thread = new Thread(() => ScriptsOfTributeAI.Instance.Play(new GameState(Board.GetFullGameState()), Board.GetListOfPossibleMoves()));
         thread.Start();
         yield return new WaitUntil(() => !thread.IsAlive);
-        var move = TalesOfTributeAI.Instance.move;
+        var move = ScriptsOfTributeAI.Instance.move;
         if (move == null)
         {
             yield return StartCoroutine(EndGame(new EndGameState(PlayerScript.Instance.playerID, GameEndReason.TURN_TIMEOUT, "Bot didn't finish turn in time!")));
@@ -464,11 +464,11 @@ public class GameManager : MonoBehaviour
         else
             _botTextCoroutine = StartCoroutine(Messages.ShowMessage(MoveText, "End turn", 2));
         MoveBot(move);
-        TalesOfTributeAI.Instance.GetLogMessages().ForEach(m => Board.Logger.Log(TalesOfTributeAI.Instance.botID, m.Item2));
+        ScriptsOfTributeAI.Instance.GetLogMessages().ForEach(m => Board.Logger.Log(ScriptsOfTributeAI.Instance.botID, m.Item2));
         BotLogsScript.Instance.Refresh();
         Board.Logger.Flush();
         RefreshBoard();
-        TalesOfTributeAI.Instance.move = null;
+        ScriptsOfTributeAI.Instance.move = null;
         yield return null;
     }
 
@@ -477,19 +477,19 @@ public class GameManager : MonoBehaviour
         Move move;
         do
         {
-            var thread = new Thread(() => TalesOfTributeAI.Instance.Play(new GameState(Board.GetFullGameState()), Board.GetListOfPossibleMoves()));
+            var thread = new Thread(() => ScriptsOfTributeAI.Instance.Play(new GameState(Board.GetFullGameState()), Board.GetListOfPossibleMoves()));
             thread.Start();
             yield return new WaitUntil(() => !thread.IsAlive);
-            move = TalesOfTributeAI.Instance.move;
+            move = ScriptsOfTributeAI.Instance.move;
             if (move == null)
             {
                 yield return StartCoroutine(EndGame(new EndGameState(PlayerScript.Instance.playerID, GameEndReason.TURN_TIMEOUT, "Bot didn't finish turn in time!")));
             }
             MoveBot(move, false);
-            TalesOfTributeAI.Instance.move = null;
+            ScriptsOfTributeAI.Instance.move = null;
             RefreshBoard();
         } while (move.Command != CommandEnum.END_TURN);
-        TalesOfTributeAI.Instance.GetLogMessages().ForEach(m => Board.Logger.Log(TalesOfTributeAI.Instance.botID, m.Item2));
+        ScriptsOfTributeAI.Instance.GetLogMessages().ForEach(m => Board.Logger.Log(ScriptsOfTributeAI.Instance.botID, m.Item2));
         BotLogsScript.Instance.Refresh();
         
         yield return null;
@@ -504,7 +504,7 @@ public class GameManager : MonoBehaviour
     {
         if (move.Command == CommandEnum.END_TURN)
         {
-            TalesOfTributeAI.Instance.ResetTimer();
+            ScriptsOfTributeAI.Instance.ResetTimer();
             EndTurn();
             return;
         }

@@ -3,15 +3,14 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
-using TalesOfTribute;
-using TalesOfTribute.AI;
-using TalesOfTribute.Serializers;
+using ScriptsOfTribute;
+using ScriptsOfTribute.AI;
+using ScriptsOfTribute.Serializers;
 using UnityEngine;
-using Debug = UnityEngine.Debug;
 
-public class TalesOfTributeAI : MonoBehaviour
+public class ScriptsOfTributeAI : MonoBehaviour
 {
-    public static TalesOfTributeAI Instance { get; private set; }
+    public static ScriptsOfTributeAI Instance { get; private set; }
     public PlayerEnum botID { get; private set; }
     private AI bot { get; set; }
 
@@ -61,9 +60,6 @@ public class TalesOfTributeAI : MonoBehaviour
             var result = bot.Play(serializedBoard, possibleMoves);
             stopwatch.Stop();
             _currentTurnTimeElapsed += stopwatch.Elapsed;
-            Debug.Log($"Move took: {stopwatch.Elapsed}");
-            Debug.Log($"Elapsed in turn: {_currentTurnTimeElapsed}");
-            Debug.Log($"Time remaining {CurrentTurnTimeRemaining}");
             return result;
         }
         );

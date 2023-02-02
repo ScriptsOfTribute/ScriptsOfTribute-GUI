@@ -1,10 +1,10 @@
 using System.Collections.Generic;
-using TalesOfTribute;
+using ScriptsOfTribute;
 using UnityEngine;
 using TMPro;
 using System.Linq;
-using TalesOfTribute.Board.Cards;
-using TalesOfTribute.Serializers;
+using ScriptsOfTribute.Board.Cards;
+using ScriptsOfTribute.Serializers;
 
 public class CardScript : MonoBehaviour
 {
