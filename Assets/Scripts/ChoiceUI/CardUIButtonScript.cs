@@ -1,13 +1,9 @@
-using System.Collections;
-using System.Collections.Generic;
-using TalesOfTribute;
 using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
 using System.Linq;
 using UnityEngine.EventSystems;
-using Unity.VisualScripting;
-using TalesOfTribute.Board.Cards;
+using ScriptsOfTribute.Board.Cards;
 
 public class CardUIButtonScript : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler
 {

@@ -1,13 +1,15 @@
+using System.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.UI;
 
 public class MoveBotButton : MonoBehaviour
 { 
     public GameObject BoardManager;
+    private bool isRunningThread = false;
 
     public void Update()
     {
-        if (GameManager.Board.CurrentPlayerId != PlayerScript.Instance.playerID && !TalesOfTributeAI.Instance.isMoving)
+        if (GameManager.Board.CurrentPlayerId != PlayerScript.Instance.playerID && !ScriptsOfTributeAI.Instance.isMoving)
             GetComponent<Button>().interactable = true;
         else
         {
@@ -16,11 +18,11 @@ public class MoveBotButton : MonoBehaviour
     }
     public void PlayMove()
     {
-        BoardManager.GetComponent<GameManager>().PlayBotMove();
+        StartCoroutine(BoardManager.GetComponent<GameManager>().PlayBotMove());
     }
 
     public void PlayAllMoves()
     {
-        BoardManager.GetComponent<GameManager>().PlayBotAllTurnMoves();
+        StartCoroutine(BoardManager.GetComponent<GameManager>().PlayBotAllTurnMoves());  
     }
 }

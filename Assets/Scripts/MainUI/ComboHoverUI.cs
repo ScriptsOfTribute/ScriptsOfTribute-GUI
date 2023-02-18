@@ -1,6 +1,6 @@
 using System.Collections.Generic;
-using TalesOfTribute;
-using TalesOfTribute.Board.Cards;
+using ScriptsOfTribute;
+using ScriptsOfTribute.Board.Cards;
 using TMPro;
 using UnityEngine;
 using UnityEngine.EventSystems;

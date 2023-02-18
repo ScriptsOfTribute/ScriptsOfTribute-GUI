@@ -2,12 +2,10 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Text;
-using TalesOfTribute;
-using TalesOfTribute.Board;
+using ScriptsOfTribute;
+using ScriptsOfTribute.Board;
 using TMPro;
 using UnityEngine;
-using UnityEngine.TextCore.Text;
-using UnityEngine.UIElements;
 
 public class EndGameUI : MonoBehaviour
 {
@@ -49,17 +47,16 @@ public class EndGameUI : MonoBehaviour
         if (PlayerScript.Instance.playerID == winner)
             return "Player won!";
         else
-            return $"{TalesOfTributeAI.Instance.Name} won!";
+            return $"{ScriptsOfTributeAI.Instance.Name} won!";
     }
 
     string ParseReason(EndGameState state)
     {
-        var loser = state.Winner == PlayerScript.Instance.playerID ? TalesOfTributeAI.Instance.Name : "Player";
-        var winner = state.Winner == PlayerScript.Instance.playerID ? "Player" : TalesOfTributeAI.Instance.Name;
+        var loser = state.Winner == PlayerScript.Instance.playerID ? ScriptsOfTributeAI.Instance.Name : "Player";
+        var winner = state.Winner == PlayerScript.Instance.playerID ? "Player" : ScriptsOfTributeAI.Instance.Name;
         return state.Reason switch
         {
             GameEndReason.INCORRECT_MOVE => $"{loser} made an incorrect move!",
-            GameEndReason.MOVE_TIMEOUT => $"{loser} didn't make move in time!",
             GameEndReason.TURN_TIMEOUT => $"{loser} didn't finish turn in time!",
             GameEndReason.TURN_LIMIT_EXCEEDED => $"Turn limit exceeded!",
             GameEndReason.PRESTIGE_OVER_40_NOT_MATCHED => $"{loser} didn't match prestige over 40!",
@@ -75,7 +72,7 @@ public class EndGameUI : MonoBehaviour
     {
         List<CompletedAction> movesList = Logger.Instance.GetMoves();
         float currentOffset = 0f;
-        string botName = TalesOfTributeAI.Instance.Name;
+        string botName = ScriptsOfTributeAI.Instance.Name;
         string whoMoves = PlayerEnum.PLAYER1 == PlayerScript.Instance.playerID ? "Player" : botName;
         var textObject = new GameObject($"Round nr. {_roundCounter}");
         textObject.transform.SetParent(Container.transform);

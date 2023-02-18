@@ -1,7 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using TalesOfTribute;
+using ScriptsOfTribute;
 
 public class CloseCardUI : MonoBehaviour
 {

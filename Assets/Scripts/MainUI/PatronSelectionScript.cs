@@ -1,12 +1,8 @@
 using System;
-using System.Collections;
 using System.Collections.Generic;
-using System.Diagnostics.Tracing;
 using System.Linq;
-using System.Threading.Tasks;
-using TalesOfTribute;
-using TalesOfTribute.Board.Cards;
-using TalesOfTribute.Board;
+using ScriptsOfTribute;
+using ScriptsOfTribute.Board;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
@@ -29,7 +25,7 @@ public class PatronSelectionScript : MonoBehaviour
         selectedPatrons = new List<PatronId>();
         availablePatrons = patrons.Select(p => p.GetComponent<PatronScript>().patronID).ToList();
         _AIselecting = false;
-        if (TalesOfTributeAI.Instance.botID == PlayerEnum.PLAYER1)
+        if (ScriptsOfTributeAI.Instance.botID == PlayerEnum.PLAYER1)
         {
             _AIselecting = true;
             AIPickPatron();
@@ -73,14 +69,14 @@ public class PatronSelectionScript : MonoBehaviour
         counter++;
         patron.GetComponent<Button>().enabled = false;
 
-        if (TalesOfTributeAI.Instance.botID == PlayerEnum.PLAYER2 && selectedPatrons.Count == 1)
+        if (ScriptsOfTributeAI.Instance.botID == PlayerEnum.PLAYER2 && selectedPatrons.Count == 1)
         {
             _AIselecting = true;
             AIPickPatron();
             AIPickPatron();
             _AIselecting = false;
         }
-        else if (TalesOfTributeAI.Instance.botID == PlayerEnum.PLAYER1 && selectedPatrons.Count == 3)
+        else if (ScriptsOfTributeAI.Instance.botID == PlayerEnum.PLAYER1 && selectedPatrons.Count == 3)
         {
             _AIselecting = true;
             AIPickPatron();
@@ -90,7 +86,7 @@ public class PatronSelectionScript : MonoBehaviour
 
     public async void AIPickPatron()
     {
-        var id = await TalesOfTributeAI.Instance.SelectPatron(availablePatrons, counter);
+        var id = ScriptsOfTributeAI.Instance.SelectPatron(availablePatrons, counter);
         if (id != PatronId.TREASURY)
         {
             selectedPatrons.Add(id);

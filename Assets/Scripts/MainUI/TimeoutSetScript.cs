@@ -1,3 +1,4 @@
+using System;
 using System.Text;
 using TMPro;
 using UnityEngine;
@@ -18,7 +19,7 @@ public class TimeoutSetScript : MonoBehaviour
         int number;
         if (int.TryParse(value, out number))
         {
-            TalesOfTributeAI.Instance.SetTimeout(number);
+            ScriptsOfTributeAI.Instance.SetTimeout(number);
         }
         else
         {

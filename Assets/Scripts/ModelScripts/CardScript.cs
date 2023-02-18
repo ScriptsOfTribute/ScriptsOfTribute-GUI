@@ -1,10 +1,10 @@
 using System.Collections.Generic;
-using TalesOfTribute;
+using ScriptsOfTribute;
 using UnityEngine;
 using TMPro;
 using System.Linq;
-using TalesOfTribute.Board.Cards;
-using TalesOfTribute.Serializers;
+using ScriptsOfTribute.Board.Cards;
+using ScriptsOfTribute.Serializers;
 
 public class CardScript : MonoBehaviour
 {
@@ -68,7 +68,7 @@ public class CardScript : MonoBehaviour
         }
         if(comboState.CurrentCombo > 0 && card.Deck != PatronId.TREASURY)
         {
-            for(int i = 1; i <= comboState.CurrentCombo; i++)
+            for(int i = 1; i <= Mathf.Min(comboState.CurrentCombo, 3); i++)
             {
                 if (card.Effects[i] != null)
                 {

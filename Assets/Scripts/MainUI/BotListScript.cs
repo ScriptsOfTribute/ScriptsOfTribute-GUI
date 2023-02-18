@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
-using TalesOfTribute.AI;
+using ScriptsOfTribute.AI;
 using UnityEngine;
 using UnityEngine.UI;
 using TMPro;

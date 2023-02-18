@@ -1,7 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using TalesOfTribute;
+using ScriptsOfTribute;
 
 public class PlayedButton : MonoBehaviour
 {
@@ -10,8 +10,8 @@ public class PlayedButton : MonoBehaviour
 
     public void OnClick()
     {
-        var serializer = GameManager.Board.GetSerializer();
-        var playerId = isBot ? TalesOfTributeAI.Instance.botID : PlayerScript.Instance.playerID;
+        var serializer = GameManager.Board.GetFullGameState();
+        var playerId = isBot ? ScriptsOfTributeAI.Instance.botID : PlayerScript.Instance.playerID;
         if (serializer.CurrentPlayer.PlayerID == playerId)
             CardShowUI.GetComponent<CardShowUIScript>().cards = serializer.CurrentPlayer.Played.ToArray();
         else

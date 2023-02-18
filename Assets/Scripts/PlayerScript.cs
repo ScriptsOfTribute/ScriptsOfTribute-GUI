@@ -1,6 +1,4 @@
-using System.Collections;
-using System.Collections.Generic;
-using TalesOfTribute;
+using ScriptsOfTribute;
 using UnityEngine;
 
 public class PlayerScript : MonoBehaviour

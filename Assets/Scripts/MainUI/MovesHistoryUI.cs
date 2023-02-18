@@ -1,14 +1,12 @@
-using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using TMPro;
-using TalesOfTribute;
+using ScriptsOfTribute;
 using System.Linq;
-using UnityEngine.EventSystems;
-using TalesOfTribute.Board;
+using ScriptsOfTribute.Board;
 using System.Text;
 using System;
-using TalesOfTribute.Board.Cards;
+using ScriptsOfTribute.Board.Cards;
 
 public class MovesHistoryUI : MonoBehaviour
 {
@@ -85,7 +83,7 @@ public class MovesHistoryUI : MonoBehaviour
     {
         List<CompletedAction> movesList = Logger.Instance.GetMoves();
         float currentOffset = 0f;
-        string botName = TalesOfTributeAI.Instance.Name;
+        string botName = ScriptsOfTributeAI.Instance.Name;
         string whoMoves = PlayerEnum.PLAYER1 == PlayerScript.Instance.playerID ? "Player" : botName;
         var roundObject = new GameObject($"Round nr. {_roundCounter}");
         roundObject.transform.SetParent(Container.transform);

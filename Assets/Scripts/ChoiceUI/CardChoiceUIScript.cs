@@ -1,10 +1,10 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel;
-using TalesOfTribute;
-using TalesOfTribute.Serializers;
+using ScriptsOfTribute;
+using ScriptsOfTribute.Serializers;
 using TMPro;
-using TalesOfTribute.Board.Cards;
+using ScriptsOfTribute.Board.Cards;
 using UnityEngine;
 using System.Linq;
 
