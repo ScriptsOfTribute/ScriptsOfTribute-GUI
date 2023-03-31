@@ -25,7 +25,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 432192478240762483}
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: -1.962, y: -0.3674, z: 0}
+  m_LocalPosition: {x: -1.792, y: -0.14, z: 0}
   m_LocalScale: {x: 2.37176, y: 2.845288, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -307,6 +307,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 6580132084722035520}
+  - component: {fileID: 559040186604609544}
   m_Layer: 0
   m_Name: Psijic
   m_TagString: Untagged
@@ -332,6 +333,19 @@ Transform:
   m_Father: {fileID: 0}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &559040186604609544
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7165441858780056234}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 622bb66ca83b8e44192f2bd7b1ed770c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  objectToAdjust: {fileID: 432192478240762483}
 --- !u!1 &9207697568748010058
 GameObject:
   m_ObjectHideFlags: 0
