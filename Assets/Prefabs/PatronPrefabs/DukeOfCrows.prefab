@@ -214,7 +214,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 3203653139491798528}
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: -1.959, y: -0.0405, z: 0}
+  m_LocalPosition: {x: -1.823, y: -0.0405, z: 0}
   m_LocalScale: {x: 2.37176, y: 2.19138, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -412,6 +412,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 6580132084722035520}
+  - component: {fileID: 7699737224301804813}
   m_Layer: 0
   m_Name: DukeOfCrows
   m_TagString: Untagged
@@ -437,6 +438,19 @@ Transform:
   m_Father: {fileID: 0}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &7699737224301804813
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7165441858780056234}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 622bb66ca83b8e44192f2bd7b1ed770c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  objectToAdjust: {fileID: 3203653139491798528}
 --- !u!1 &8459838117007164246
 GameObject:
   m_ObjectHideFlags: 0

@@ -5,7 +5,7 @@ public class BotLogsScript : MonoBehaviour
 {
     public static BotLogsScript Instance;
     public GameObject ScrollView;
-    public GameObject LogsPanel;
+    public TMP_InputField InputField;
     public TMP_FontAsset Font;
 
     private void Awake()
@@ -34,19 +34,9 @@ public class BotLogsScript : MonoBehaviour
         }
     }
 
-    private void CreateTextObject(string text)
+    private void AddLog(string text)
     {
-        var textObject = new GameObject();
-        textObject.transform.SetParent(LogsPanel.transform);
-        //
-        textObject.AddComponent<TextMeshProUGUI>();
-        textObject.GetComponent<TextMeshProUGUI>().SetText(text);
-        textObject.GetComponent<TextMeshProUGUI>().font = Font;
-        textObject.GetComponent<TextMeshProUGUI>().alignment = TextAlignmentOptions.Center;
-        textObject.GetComponent<TextMeshProUGUI>().enableAutoSizing = true;
-        textObject.GetComponent<TextMeshProUGUI>().fontSizeMin = 14f;
-        textObject.GetComponent<RectTransform>().sizeDelta = new Vector2(200f, 50f);
-        textObject.GetComponent<RectTransform>().localScale = new Vector3(1f, 1f, 1f);
+        InputField.text += text;
     }
 
     void OnPanelEnable()
@@ -54,16 +44,13 @@ public class BotLogsScript : MonoBehaviour
         var logs = Logger.Instance.Logs;
         foreach(string log in logs)
         {
-            CreateTextObject(log);
+            AddLog(log);
         }
     }
 
-    void OnPanelDisable()
+    public void OnPanelDisable()
     {
-        for(int i = 0; i < LogsPanel.transform.childCount; i++)
-        {
-            Destroy(LogsPanel.transform.GetChild(i).gameObject);
-        }
+        InputField.text = "";
     }
 
     public void Clear()

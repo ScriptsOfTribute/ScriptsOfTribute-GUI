@@ -91,4 +91,14 @@ public class MiscButtonHandler : MonoBehaviour
         BotLogsScript.Instance.Clear();
     }
 
+    public void DeactivatePanel(GameObject Panel)
+    {
+        Panel.SetActive(false);
+    }
+
+    public void ClearLogsPanel()
+    {
+        BotLogsScript.Instance.OnPanelDisable();
+    }
+
 }
