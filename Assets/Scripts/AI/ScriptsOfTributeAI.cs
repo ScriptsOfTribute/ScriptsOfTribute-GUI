@@ -55,7 +55,7 @@ public class ScriptsOfTributeAI : MonoBehaviour
         return Task.Run(() => {
             var stopwatch = new Stopwatch();
             stopwatch.Start();
-            var result = bot.Play(serializedBoard, possibleMoves);
+            var result = bot.Play(serializedBoard, possibleMoves, CurrentTurnTimeRemaining);
             stopwatch.Stop();
             _currentTurnTimeElapsed += stopwatch.Elapsed;
             return result;
@@ -67,6 +67,7 @@ public class ScriptsOfTributeAI : MonoBehaviour
     {
         isMoving = true;
         var task = SelectPatronTask(availablePatrons, round);
+        UnityEngine.Debug.Log(availablePatrons);
         if (task.Wait(CurrentTurnTimeRemaining))
         {
             var patronID = task.Result;

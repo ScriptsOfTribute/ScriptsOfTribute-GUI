@@ -24,6 +24,7 @@ public class PatronSelectionScript : MonoBehaviour
     {
         selectedPatrons = new List<PatronId>();
         availablePatrons = patrons.Select(p => p.GetComponent<PatronScript>().patronID).ToList();
+        Debug.Log(availablePatrons);
         _AIselecting = false;
         if (ScriptsOfTributeAI.Instance.botID == PlayerEnum.PLAYER1)
         {

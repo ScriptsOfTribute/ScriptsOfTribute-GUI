@@ -71,7 +71,7 @@ public class PatronScript : MonoBehaviour
                 break;
             case PatronId.ORGNUM:
                 toReturn = @"<color=""green"">Favored<color=""white"">
-<size=70%><color=""grey"">Pay 3 Coin: <color=""white"">Gain 1 Power for every 4 cards you own, rounded down. Create 1 Maormer Boarding Patry Card and place it in your cooldown<size=100%>";
+<size=70%><color=""grey"">Pay 3 Coin: <color=""white"">Gain 1 Power for every 4 cards you own, rounded down. Create 1 Summerset Sacking Card and place it in your cooldown<size=100%>";
                 break;
             case PatronId.PSIJIC:
                 toReturn = @"<color=""green"">Favored<color=""white"">

@@ -158,7 +158,7 @@ public class EndGameUI : MonoBehaviour
             case CompletedActionType.KNOCKOUT:
                 sb.Append($"Knockout - Source: {source}, Target: {action.TargetCard.Name}");
                 break;
-            case CompletedActionType.ADD_BOARDING_PARTY:
+            case CompletedActionType.ADD_SUMMERSET_SACKING:
                 sb.Append($"Add Boarding Party - Source: {source}");
                 break;
             case CompletedActionType.ADD_BEWILDERMENT_TO_OPPONENT:
