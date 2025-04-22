@@ -121,6 +121,7 @@ public class CardScript : MonoBehaviour
             PatronId.PELIN => "Pelin",
             PatronId.RED_EAGLE => "RedEagle",
             PatronId.TREASURY => "Treasury",
+            PatronId.SAINT_ALESSIA => "SaintAlessia",
             _ => ""
         };
         return $"{deck} {type}";

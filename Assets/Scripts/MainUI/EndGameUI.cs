@@ -176,6 +176,15 @@ public class EndGameUI : MonoBehaviour
             case CompletedActionType.ADD_WRIT_OF_COIN:
                 sb.Append($"Add Writ Of Coin - Source {source}");
                 break;
+            case CompletedActionType.KNOCKOUT_ALL:
+                sb.Append($"Knockout all agents - Source {source}");
+                break;
+            case CompletedActionType.ADD_CHAINBREAKER_SERGEANT:
+                sb.Append($"Add Chainbreaker Sergeant - Source: {source}");
+                break;
+            case CompletedActionType.ADD_SOLDIER_OF_THE_EMPIRE:
+                sb.Append($"Add Soldier of The Empire - Source: {source}");
+                break;
             default:
                 throw new ArgumentOutOfRangeException();
         }

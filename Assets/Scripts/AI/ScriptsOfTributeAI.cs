@@ -67,7 +67,6 @@ public class ScriptsOfTributeAI : MonoBehaviour
     {
         isMoving = true;
         var task = SelectPatronTask(availablePatrons, round);
-        UnityEngine.Debug.Log(availablePatrons);
         if (task.Wait(CurrentTurnTimeRemaining))
         {
             var patronID = task.Result;
