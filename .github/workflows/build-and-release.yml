@@ -27,7 +27,7 @@ jobs:
           key: Library-${{ matrix.targetPlatform }}
 
       - name: Build with Unity
-        uses: game-ci/unity-builder@v2
+        uses: game-ci/unity-builder@v4
         with:
           unityVersion: 2022.3.4f1
           targetPlatform: ${{ matrix.targetPlatform }}
@@ -42,7 +42,7 @@ jobs:
           zip -r ../../Build-${{ matrix.targetPlatform }}.zip .
 
       - name: Upload zip artifact
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: Build-${{ matrix.targetPlatform }}.zip
           path: Build-${{ matrix.targetPlatform }}.zip
