@@ -555,7 +555,7 @@ RectTransform:
   - {fileID: 7639844390860511378}
   - {fileID: 5738190774517982584}
   m_Father: {fileID: 0}
-  m_RootOrder: 0
+  m_RootOrder: -1
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
@@ -656,7 +656,9 @@ MonoBehaviour:
   - {fileID: 21300000, guid: 8df83e5da7ec30e47971f83482a977eb, type: 3}
   - {fileID: 21300000, guid: 4995a0e13de07b64ba7244b1d2666b1d, type: 3}
   - {fileID: 21300000, guid: 8fec64805fdd333448db04217deb7cea, type: 3}
-  - {fileID: 21300000, guid: 9df2e0d6da60e4f49b81d89b9ad48ffc, type: 3}
+  - {fileID: 21300000, guid: 142d7481727150a418eac63adb562cda, type: 3}
+  - {fileID: 21300000, guid: bb896bb41e72d3c4f975c5ebe3405858, type: 3}
+  - {fileID: 21300000, guid: 6e4d40aa0e6f2b84fbd744903e301c9f, type: 3}
   - {fileID: 21300000, guid: 6e4d40aa0e6f2b84fbd744903e301c9f, type: 3}
 --- !u!60 &3610821604146459509
 PolygonCollider2D:
@@ -668,6 +670,25 @@ PolygonCollider2D:
   m_Enabled: 1
   m_Density: 1
   m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_ForceSendLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_ForceReceiveLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_ContactCaptureLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_CallbackLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
   m_IsTrigger: 0
   m_UsedByEffector: 0
   m_UsedByComposite: 0
@@ -693,6 +714,7 @@ PolygonCollider2D:
       - {x: 0.034570307, y: -1.8120409}
       - {x: 0.9237695, y: -0.95092773}
       - {x: 0.945498, y: 0.95469236}
+  m_UseDelaunayMesh: 0
 --- !u!114 &-14568575409116614
 MonoBehaviour:
   m_ObjectHideFlags: 0

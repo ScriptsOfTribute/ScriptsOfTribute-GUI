@@ -1,4 +1,4 @@
-using System.Collections;
+    using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using ScriptsOfTribute;
@@ -36,6 +36,9 @@ public class PatronScript : MonoBehaviour
                 break;
             case PatronId.PELIN:
                 toReturn = @"Saint Pelin";
+                break;
+            case PatronId.SAINT_ALESSIA:
+                toReturn = @"Saint Alessia";
                 break;
             case PatronId.TREASURY:
                 break;
@@ -81,6 +84,11 @@ public class PatronScript : MonoBehaviour
                 toReturn = @"<color=""green"">Favored<color=""white"">
 <size=70%><color=""grey"">Pay 2 Power. Have 1 agent card in your cooldown: <color=""white"">Return up to 1 agent from your cooldown to the top of your draw<size=100%>";
                 break;
+            case PatronId.SAINT_ALESSIA:
+                toReturn = @"<color=""green"">Favored<color=""white"">
+<size=70%><color=""grey"">Pay 4 Coin: <color=""white"">Create 1 Chainbreaker Sergeant card and place it in your cooldown pile.<size=100%>";
+                break;
+
             case PatronId.TREASURY:
                 break;
         }
@@ -126,6 +134,11 @@ This patron now <color=""green"">favors<color=""white""> you<size=100%>";
                 toReturn = @"<color=""white"">Neutral<color=""white"">
 <size=70%><color=""grey"">Pay 2 Power. Have 1 agent card in your cooldown: <color=""white"">Return up to 1 agent from your cooldown to the top of your draw. This patron now <color=""green"">favors<color=""white""> you<size=100%>";
                 break;
+            case PatronId.SAINT_ALESSIA:
+                toReturn = @"<color=""white"">Neutral<color=""white"">
+<size=70%><color=""grey"">Pay 4 Coin: <color=""white"">Create 1 Soldier of the Empire card and place it in your cooldown pile. This patron now <color=""green"">favors<color=""white""> you<size=100%>";
+                break;
+
             case PatronId.TREASURY:
                 break;
         }
@@ -170,6 +183,10 @@ This patron is now <color=""white"">neutral<color=""white""><size=100%>";
             case PatronId.PELIN:
                 toReturn = @"<color=""red"">Unfavored<color=""white"">
 <size=70%><color=""grey"">Pay 2 Power. Have 1 agent card in your cooldown: <color=""white"">Return up to 1 agent from your cooldown to the top of your draw. This patron is now Neutral";
+                break;
+            case PatronId.SAINT_ALESSIA:
+                toReturn = @"<color=""red"">Unfavored<color=""white"">
+<size=70%><color=""grey"">Pay 4 Coin: <color=""white"">Gain 2 Power. This patron is now Neutral";
                 break;
             case PatronId.TREASURY:
                 break;

@@ -1,0 +1,68 @@
+name: Build and Release Unity Game
+
+on:
+  push:
+    tags:
+      - "v*"
+
+jobs:
+  build:
+    name: Build ${{ matrix.targetPlatform }}
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        targetPlatform:
+          - StandaloneWindows64
+          - StandaloneLinux64
+          - StandaloneOSX
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Cache Unity Library
+        uses: actions/cache@v3
+        with:
+          path: Library
+          key: Library-${{ matrix.targetPlatform }}
+
+      - name: Build with Unity
+        uses: game-ci/unity-builder@v2
+        with:
+          unityVersion: 2022.3.4f1
+          targetPlatform: ${{ matrix.targetPlatform }}
+        env:
+          UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
+          UNITY_EMAIL: ${{ secrets.UNITY_EMAIL }}
+          UNITY_PASSWORD: ${{ secrets.UNITY_PASSWORD }}
+
+      - name: Archive build into ZIP
+        run: |
+          cd build/${{ matrix.targetPlatform }}
+          zip -r ../../Build-${{ matrix.targetPlatform }}.zip .
+
+      - name: Upload zip artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: Build-${{ matrix.targetPlatform }}.zip
+          path: Build-${{ matrix.targetPlatform }}.zip
+
+  release:
+    name: Create GitHub Release
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download all zipped build artifacts
+        uses: actions/download-artifact@v3
+        with:
+          path: builds
+
+      - name: Create GitHub release with ZIPs
+        uses: softprops/action-gh-release@v1
+        with:
+          files: |
+            builds/Build-StandaloneWindows64.zip
+            builds/Build-StandaloneLinux64.zip
+            builds/Build-StandaloneOSX.zip
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
