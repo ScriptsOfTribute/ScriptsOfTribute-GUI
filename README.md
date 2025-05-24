@@ -1,3 +1,8 @@
+# Deprecated tool ⚠
+This debug tool is deprecated and not maintained anymore. It got replaced with newer tool [Scripts of Tribute 2.0](https://github.com/Ematerasu/ScriptsOfTribute-2.0)
+
+------
+
 # Scripts of Tribute (SoT) GUI
 GUI App created in Unity based on [Script of Tribute engine](https://github.com/ScriptsOfTribute/ScriptsOfTribute-Core)
 
